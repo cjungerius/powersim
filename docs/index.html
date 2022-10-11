@@ -153,6 +153,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </header>
 
+<p>UPDATE: Python version available <a href="./python.html">here</a></p>
 <p>In this notebook we’ll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from <a href="https://journals.sagepub.com/doi/full/10.1177/2515245920965119">a great tutorial about this topic by Lisa DeBruine</a> and her appendix on its application for <a href="https://debruine.github.io/lmem_sim/articles/appendix1c_sensitivity.html">sensitivity analysis</a></p>
 <p>Before we do anything, let’s import all the packages we will need:</p>
 <div class="cell">
@@ -394,33 +395,33 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">-65.21650</td>
-<td style="text-align: right;">-38.108743</td>
+<td style="text-align: right;">19.397526</td>
+<td style="text-align: right;">0.6981572</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">-16.58867</td>
-<td style="text-align: right;">2.988214</td>
+<td style="text-align: right;">7.194610</td>
+<td style="text-align: right;">13.3415659</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">-68.28623</td>
-<td style="text-align: right;">11.762051</td>
+<td style="text-align: right;">20.588225</td>
+<td style="text-align: right;">6.6384248</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">-39.12700</td>
-<td style="text-align: right;">20.482698</td>
+<td style="text-align: right;">-2.435126</td>
+<td style="text-align: right;">-4.6639812</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">-50.54895</td>
-<td style="text-align: right;">1.831052</td>
+<td style="text-align: right;">4.181630</td>
+<td style="text-align: right;">9.4626016</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">6</td>
-<td style="text-align: right;">-55.44496</td>
-<td style="text-align: right;">-13.285540</td>
+<td style="text-align: right;">2.965948</td>
+<td style="text-align: right;">-7.6438143</td>
 </tr>
 </tbody>
 </table>
@@ -457,42 +458,42 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">distractor_present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">629.3208</td>
+<td style="text-align: right;">798.7024</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">2</td>
 <td style="text-align: left;">distractor_present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">559.1973</td>
+<td style="text-align: right;">517.1310</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: left;">distractor_present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">634.3241</td>
+<td style="text-align: right;">827.5971</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">4</td>
 <td style="text-align: left;">distractor_present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">720.5362</td>
+<td style="text-align: right;">788.1649</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">5</td>
 <td style="text-align: left;">distractor_present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">358.3489</td>
+<td style="text-align: right;">829.7890</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: left;">distractor_present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">706.9192</td>
+<td style="text-align: right;">757.6179</td>
 </tr>
 </tbody>
 </table>
@@ -555,27 +556,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: left;">fixed</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">(Intercept)</td>
-<td style="text-align: right;">602.6615747</td>
-<td style="text-align: right;">11.03152</td>
-<td style="text-align: right;">54.630863</td>
-<td style="text-align: right;">9.000071</td>
+<td style="text-align: right;">630.2876513</td>
+<td style="text-align: right;">10.157614</td>
+<td style="text-align: right;">62.050761</td>
+<td style="text-align: right;">9.000682</td>
 <td style="text-align: right;">0.0000000</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">fixed</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">categorydistractor_present</td>
-<td style="text-align: right;">37.8240318</td>
-<td style="text-align: right;">7.50616</td>
-<td style="text-align: right;">5.039066</td>
-<td style="text-align: right;">9.000126</td>
-<td style="text-align: right;">0.0007006</td>
+<td style="text-align: right;">32.9581130</td>
+<td style="text-align: right;">7.240272</td>
+<td style="text-align: right;">4.552054</td>
+<td style="text-align: right;">9.000076</td>
+<td style="text-align: right;">0.0013818</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ran_pars</td>
 <td style="text-align: left;">subj_id</td>
 <td style="text-align: left;">sd__(Intercept)</td>
-<td style="text-align: right;">32.5884034</td>
+<td style="text-align: right;">29.7220543</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -585,7 +586,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: left;">ran_pars</td>
 <td style="text-align: left;">subj_id</td>
 <td style="text-align: left;">cor__(Intercept).categorydistractor_present</td>
-<td style="text-align: right;">0.0905816</td>
+<td style="text-align: right;">-0.0656712</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -595,7 +596,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: left;">ran_pars</td>
 <td style="text-align: left;">subj_id</td>
 <td style="text-align: left;">sd__categorydistractor_present</td>
-<td style="text-align: right;">15.9230285</td>
+<td style="text-align: right;">15.0822466</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -605,7 +606,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: left;">ran_pars</td>
 <td style="text-align: left;">Residual</td>
 <td style="text-align: left;">sd__Observation</td>
-<td style="text-align: right;">176.0345278</td>
+<td style="text-align: right;">172.2617884</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -743,8 +744,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <pre><code># A tibble: 2 x 4
   term        mean_estimate mean_se power
   &lt;chr&gt;               &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
-1 (Intercept)         649.    23.7  1    
-2 X_i                  30.0    7.89 0.922</code></pre>
+1 (Intercept)         651.    23.4  1    
+2 X_i                  29.7    7.75 0.937</code></pre>
 </div>
 </div>
 <p>If we want to run our sensitivity analysis across a given parameter space, we’ll have to map the function single_run to generate data across this space, for example, over a varying number of participants:</p>
@@ -808,7 +809,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <p>Our power analysis has determined that, with the parameters established above, we need ~8 or more participants to reliably detect an effect!</p>
 <p>The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in <code>single_run</code> and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package <code>brms</code>, see <a href="https://solomonkurz.netlify.app/post/bayesian-power-analysis-part-i/">this blog post</a>).</p>
-<p>Even if the above code is spaghetti to you (I was originally planning on also converting it to python/matlab, but there are only so many hours in the day), I hope you will take away a few things from this tutorial:</p>
+<p>Even if the above code is spaghetti to you (~I was originally planning on also converting it to python/matlab, but there are only so many hours in the day~<a href="./python.html">click here for a python version</a>), I hope you will take away a few things from this tutorial:</p>
 <ul>
 <li>Power analysis is nothing more than testing whether we can recover the parameters of a hypothesised data-generating process reliably using our statistical test of choice.</li>
 <li>We can determine the parameters for such a data-generating process in the same way we formulate hypotheses (and indeed, <em>in some ways these two things are one and the same</em>): we use our knowledge, intuition, and previous work to inform our decision-making.</li>

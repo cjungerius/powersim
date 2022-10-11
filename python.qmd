@@ -1,0 +1,356 @@
+---
+title: "Power Simulation in a Mixed Effects design using Python"
+author: 
+  - name: Chris Jungerius
+  - email: d.c.jungerius@vu.nl
+format: html
+html:
+warning: false
+error: false
+---
+
+In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from [a great tutorial about this topic by Lisa DeBruine](https://journals.sagepub.com/doi/full/10.1177/2515245920965119) and her appendix on its application for [sensitivity analysis](https://debruine.github.io/lmem_sim/articles/appendix1c_sensitivity.html)
+
+Before we do anything, let's import all the packages we will need:
+
+```{python output: false}
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import seaborn.objects as so
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import itertools
+import glob, os, warnings
+from sklearn.model_selection import ParameterGrid
+```
+
+In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study from the Serences lab purpose-built to be used for sensitivity analysis. First let's import the data for our specific case from the [Adam et al. (2021)](https://www.journalofcognition.org/articles/10.5334/joc.182/) study, which is freely available [in an OSF repository](https://osf.io/u7wvy/), and look at the data.
+
+Note that when previous data doesn't exist (or even if it does, but you don't trust that it's  sufficient to base your effect estimates on) there are alternative ways of determining such parameters, including [formally determining a smallest effect size of interest](https://journals.sagepub.com/doi/full/10.1177/2515245918770963).
+
+The data we chose is from experiment 1c: variable colour singleton search.
+We are interested in the raw trial data, not the summary data (We are doing a mixed model after all, not an ANOVA) so we have to grab all the raw files and concatenate them.
+
+```{python}
+
+path = os.path.join(os.getcwd(),"Experiment_1c")
+all_files = glob.glob(os.path.join(path, "*.csv"))
+df = pd.concat((pd.read_csv(f) for f in all_files), ignore_index=True)
+```
+
+Once it's imported, we can take a look at our data, e.g., looking at subject means between the two conditions:
+
+```{python}
+
+d = (df
+  .query("acc==1 & set_size==4")
+  .assign(rt = lambda x: x.rt * 1000))
+
+sns.set_theme()
+
+sns.catplot(
+  data=d,
+  x="distractor",
+  y="rt",
+  hue="subject",
+  kind="point"
+)
+
+```
+
+We can clearly see typical atttentional capture effects in the data. Now that we have the data, let's model it:
+
+```{python}
+d = (df
+  .query("acc==1 & set_size==4")
+  .assign(rt = lambda x: x.rt * 1000))
+
+# Our model is simple: RT is dependent on distractor presence, with a random slope and intercept for each subject. More complex models are left as an exercise to the reader.
+
+md = smf.mixedlm("rt ~ distractor", d, groups=d['subject'],re_formula="~distractor")
+mdf = md.fit()
+mdf.summary()
+```
+
+The above model `rt ~ distractor + ( distractor | subject)` is our putative *data generating process*, the parameters that we believe underly the generation of observed dependent variables, and the relationship between those parameters. The table shown above gives us parameter estimates for all fixed and random effects in the model. Now let's plug those parameters into a simulation!
+
+```{python}
+
+n_subj     = 10   # number of subjects
+n_present  = 200   # number of distractor present trials
+n_absent   = 200   # number of distractor absent
+beta_0     = 650   # grand mean
+beta_1     = 30   # effect of category
+tau_0      = 80   # by-subject random intercept sd
+tau_1      = 15   # by-subject random slope sd
+rho        = 0.35   # correlation between intercept and slope
+sigma      = 175 # residual nose
+
+```
+
+Generate trials with their fixed effects:
+```{python}
+# simulate a sample of items
+# total number of items = n_ingroup + n_outgroup
+
+items = (pd
+  .DataFrame({
+    'item_id': range(n_absent+n_present),
+    'category' : np.repeat(['absent', 'present'], [n_absent, n_present])})
+  .assign(X_i=lambda x: np.where(x["category"] == 'present', 0.5, -0.5)))
+
+items.describe()
+```
+
+And generate participants with their random intercepts and slopes:
+
+```{python}
+# simulate a sample of subjects
+
+# calculate random intercept / random slope covariance
+covar = rho * tau_0 * tau_1
+
+# put values into variance-covariance matrix
+cov_mx = np.array([
+  [tau_0**2, covar], 
+  [covar, tau_1**2]
+])
+
+# generate the by-subject random effects
+subject_rfx = np.random.multivariate_normal(mean = [0, 0], cov = cov_mx, size = n_subj)
+
+# combine with subject IDs
+subjects = pd.DataFrame({
+  'subj_id': range(n_subj),
+  'T_0s': subject_rfx[:,0],
+  'T_1s': subject_rfx[:,1]
+})
+
+subjects.describe()
+```
+
+Now combine and add residual noise to create a complete dataframe:
+
+```{python}
+
+#cross items and subjects, add noise
+items['key'] = 1
+subjects['key'] = 1
+trials = (pd
+  .merge(items,subjects, on='key')
+  .drop("key",axis=1)
+  .assign(e_si = lambda x: np.random.normal(scale=sigma,size=len(x))))
+
+
+# calculate the response variable
+dat_sim = (trials
+  .assign(RT = lambda x: beta_0 + x.T_0s + (beta_1 + x.T_1s) * x.X_i + x.e_si)
+  .filter(items=['subj_id', 'item_id', 'category', 'X_i', 'RT']))
+
+dat_sim.head(10)
+```
+
+Data generated! Does it look like we'd expect?
+
+```{python}
+
+sns.catplot(
+  data=dat_sim,
+  x="category",
+  y="RT",
+  hue="subj_id",
+  kind="point"
+)
+
+```
+
+Looks comparable to the original data! Now let's fit a model to see if we recover the parameters:
+
+```{python}
+md = smf.mixedlm("RT ~ category", dat_sim, groups=dat_sim['subj_id'],  re_formula="~category")
+mdf = md.fit()
+mdf.summary()
+```
+
+Great, our simulation works - our fixed effect parameter estimates are close to the originals, and statistically significant! Now for a power analysis, we'd put the above in functions and run the code many times for a given combination of parameters. See below:
+
+```{python}
+def my_sim_data(
+  n_subj     = 5,   # number of subjects
+  n_present  = 200,   # number of distractor present trials
+  n_absent   = 200,   # number of distractor absent
+  beta_0     = 650,   # grand mean
+  beta_1     = 30,   # effect of category
+  tau_0      = 80,   # by-subject random intercept sd
+  tau_1      = 15,   # by-subject random slope sd
+  rho        = 0.35,   # correlation between intercept and slope
+  sigma      = 175
+  ):
+  
+
+  # simulate a sample of items
+  # total number of items = n_ingroup + n_outgroup
+  items = (pd.DataFrame({
+  'item_id': range(n_absent+n_present),
+  'category' : np.repeat(['absent', 'present'], [n_absent, n_present])
+})
+  .assign(X_i=lambda x: np.where(x["category"] == 'present', 0.5, -0.5)))
+
+
+  # simulate a sample of subjects
+
+  # calculate random intercept / random slope covariance
+  covar = rho * tau_0 * tau_1
+
+  # put values into variance-covariance matrix
+  cov_mx = np.array([
+    [tau_0**2, covar], 
+    [covar, tau_1**2]
+  ])
+
+  # generate the by-subject random effects
+  subject_rfx = np.random.multivariate_normal(mean = [0, 0], cov = cov_mx, size = n_subj)
+
+  # combine with subject IDs
+  subjects = pd.DataFrame({
+    'subj_id': range(n_subj),
+    'T_0s': subject_rfx[:,0],
+    'T_1s': subject_rfx[:,1]
+  })
+
+  #cross items and subjects, add noise
+  items['key'] = 1
+  subjects['key'] = 1
+  trials = (pd
+    .merge(items,subjects, on='key').drop("key",axis=1)
+    .assign(e_si = lambda x: np.random.normal(scale=sigma,size=len(x))))
+
+
+  # calculate the response variable
+  dat_sim = (trials
+    .assign(RT = lambda x: beta_0 + x.T_0s + (beta_1 + x.T_1s) * x.X_i + x.e_si)
+    .filter(items=['subj_id', 'item_id', 'category', 'X_i', 'RT']))
+
+  return dat_sim
+```
+
+The above function simulates data. The function below combines it with a model fit so we have a function that can be repeatedly called during our power analysis.
+
+```{python}
+
+def single_run(filename = None, *args, **kwargs):
+  dat_sim = my_sim_data(*args, **kwargs)
+  with warnings.catch_warnings(record=True) as w:
+    warnings.simplefilter("ignore")
+    md = smf.mixedlm("RT ~ category", dat_sim, groups=dat_sim['subj_id'], re_formula="~category")
+    mod_sim = md.fit()
+  sim_results = (mod_sim
+    .summary()
+    .tables[1]
+    .assign(**kwargs))
+  sim_results = sim_results.apply(pd.to_numeric, errors='coerce')
+  sim_results.index.rename('i',inplace=True)
+
+  if not filename == None:
+    hdr = not os.path.isfile(filename)
+    sim_results.to_csv(filename, mode='a',header=hdr)
+  
+  return sim_results
+```
+
+Now let's run our sensitivity analysis - we will run our simulation many times (100 times here for speed, but aim for more, like 1000+) for each combination of parameters, and record how often the fixed effect estimates reach significance:
+```{python}
+nreps = 100
+
+params = ParameterGrid({
+  'n_subj'     : [5], # number of subjects
+  'n_present'  : [150],   # number of distractor present trials
+  'n_absent'   : [150],   # number of distractor absent
+  'beta_0'     : [650],   # grand mean
+  'beta_1'     : [30],   # effect of category
+  'tau_0'      : [80],   # by-subject random intercept sd
+  'tau_1'      : [15],   # by-subject random slope sd
+  'rho'        : [0.35],   # correlation between intercept and slope
+  'sigma'      : [175]  # residual (standard deviation)
+})
+
+sims = pd.concat([single_run(**param) for param in params for i in range(nreps)])
+
+
+  
+alpha = 0.05
+
+(sims
+  .assign(power = sims['P>|z|'] < alpha)
+  .query('i=="Intercept" or i=="category[T.present]"')
+  .groupby(['i'])
+  .agg(
+      mean_estimate = ('Coef.','mean'),
+      mean_se = ('Coef.', 'sem'),
+      power = ('power', 'mean')))
+```
+
+If we want to run our sensitivity analysis across a given parameter space, we'll have to map the function single_run to generate data across this space, for example, over a varying number of participants:
+
+```{python}
+filename1 = "sens_py.csv"
+nreps = 100
+
+params = ParameterGrid({
+  'n_subj'     : range(2,10), # number of subjects
+  'n_present'  : [150],   # number of distractor present trials
+  'n_absent'   : [150],   # number of distractor absent
+  'beta_0'     : [650],   # grand mean
+  'beta_1'     : [30],   # effect of category
+  'tau_0'      : [80],   # by-subject random intercept sd
+  'tau_1'      : [15],   # by-subject random slope sd
+  'rho'        : [0.35],   # correlation between intercept and slope
+  'sigma'      : [175]  # residual (standard deviation)
+})
+
+
+
+if not os.path.isfile(filename1):
+  # run a simulation for each row of params
+  # and save to a file on each rep
+  sims1 = pd.concat([single_run(**param, filename=filename1) for param in params for i in range(nreps)])
+
+```
+
+Note that the above could obviously also be run over other dimensions of our parameter space, e.g. for different estimates of the fixed effects, amount of noise, number of trials, etc. etc., by changing the `params` list.
+How did we do? Let's take a look at our power curve.
+
+```{python}
+
+
+sims1 = pd.read_csv('sens_py.csv')
+
+power1 = (sims1.assign(power = sims1['P>|z|'] < alpha)
+  .query('i=="category[T.present]"')\
+  .groupby(['n_subj'])\
+  .agg(
+    mean_estimate = ('Coef.','mean'),
+    mean_se = ('Coef.', 'sem'),
+    power = ('power', 'mean')))
+
+```
+
+```{python}
+
+sns.regplot(x=power1.index, y=power1["power"],lowess=True)
+
+```
+
+Our power analysis suggests that, with the parameters established above, we need ~8 or more participants to reliably detect an effect!
+
+The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see [this blog post](https://solomonkurz.netlify.app/post/bayesian-power-analysis-part-i/)).
+
+Even if the above code is spaghetti to you ([Perhaps you prefer R?](index.qmd)), I hope you will take away a few things from this tutorial:
+
+- Power analysis is nothing more than testing whether we can recover the parameters of a hypothesised data-generating process reliably using our statistical test of choice.
+- We can determine the parameters for such a data-generating process in the same way we formulate hypotheses (and indeed, *in some ways these two things are one and the same*): we use our knowledge, intuition, and previous work to inform our decision-making.
+- If you have a hypothetical data-generating process, you can simulate data by simply formalising that process as code and letting it simulate a dataset
+- Simulation can help you answer questions about your statistical approach that are difficult to answer with other tools
+
+
