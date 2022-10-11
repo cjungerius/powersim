@@ -82,6 +82,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
@@ -122,12 +123,38 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </head>
 
-<body class="fullcontent">
+<body class="nav-sidebar docked fullcontent">
 
 <div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Power Simulation in a Mixed Effects design using Python</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">R version</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./python.html" class="sidebar-item-text sidebar-link active">Python version</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
 <!-- margin-sidebar -->
     
 <!-- main -->
@@ -135,7 +162,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Power Simulation in a Mixed Effects design using Python</h1>
+<h1 class="title d-none d-lg-block">Power Simulation in a Mixed Effects design using Python</h1>
 </div>
 
 
@@ -192,8 +219,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  hue<span class="op">=</span><span class="st">"subject"</span>,</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  kind<span class="op">=</span><span class="st">"point"</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x1e48f960988&gt;</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x1bc9e851948&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="python_files/figure-html/cell-4-output-2.png" width="533" height="557"></p>
@@ -210,7 +237,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>md <span class="op">=</span> smf.mixedlm(<span class="st">"rt ~ distractor"</span>, d, groups<span class="op">=</span>d[<span class="st">'subject'</span>],re_formula<span class="op">=</span><span class="st">"~distractor"</span>)</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>mdf <span class="op">=</span> md.fit()</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>mdf.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="20">
 
 <table class="simpletable">
 <tbody><tr>
@@ -278,7 +305,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  .assign(X_i<span class="op">=</span><span class="kw">lambda</span> x: np.where(x[<span class="st">"category"</span>] <span class="op">==</span> <span class="st">'present'</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)))</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>items.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div class="cell-output cell-output-display" data-execution_count="22">
 
 <div>
 
@@ -360,7 +387,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>subjects.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
+<div class="cell-output cell-output-display" data-execution_count="23">
 
 <div>
 
@@ -383,44 +410,44 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <tr>
       <th>mean</th>
       <td>4.50000</td>
-      <td>4.504165</td>
-      <td>-1.873139</td>
+      <td>-19.427597</td>
+      <td>0.048134</td>
     </tr>
     <tr>
       <th>std</th>
       <td>3.02765</td>
-      <td>73.902334</td>
-      <td>16.003082</td>
+      <td>84.256536</td>
+      <td>16.040846</td>
     </tr>
     <tr>
       <th>min</th>
       <td>0.00000</td>
-      <td>-142.374490</td>
-      <td>-24.238591</td>
+      <td>-120.305371</td>
+      <td>-29.369881</td>
     </tr>
     <tr>
       <th>25%</th>
       <td>2.25000</td>
-      <td>-24.674344</td>
-      <td>-18.007176</td>
+      <td>-83.240403</td>
+      <td>-6.567105</td>
     </tr>
     <tr>
       <th>50%</th>
       <td>4.50000</td>
-      <td>28.476472</td>
-      <td>3.896861</td>
+      <td>-33.461617</td>
+      <td>0.363189</td>
     </tr>
     <tr>
       <th>75%</th>
       <td>6.75000</td>
-      <td>60.661848</td>
-      <td>9.098724</td>
+      <td>12.695279</td>
+      <td>9.853446</td>
     </tr>
     <tr>
       <th>max</th>
       <td>9.00000</td>
-      <td>73.153287</td>
-      <td>20.876987</td>
+      <td>164.840751</td>
+      <td>27.977543</td>
     </tr>
   </tbody>
 </table>
@@ -444,7 +471,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  .<span class="bu">filter</span>(items<span class="op">=</span>[<span class="st">'subj_id'</span>, <span class="st">'item_id'</span>, <span class="st">'category'</span>, <span class="st">'X_i'</span>, <span class="st">'RT'</span>]))</span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>dat_sim.head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="24">
 
 <div>
 
@@ -466,7 +493,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>564.972949</td>
+      <td>720.999659</td>
     </tr>
     <tr>
       <th>1</th>
@@ -474,7 +501,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>609.276783</td>
+      <td>593.480957</td>
     </tr>
     <tr>
       <th>2</th>
@@ -482,7 +509,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>474.376545</td>
+      <td>573.642211</td>
     </tr>
     <tr>
       <th>3</th>
@@ -490,7 +517,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>798.241290</td>
+      <td>522.415496</td>
     </tr>
     <tr>
       <th>4</th>
@@ -498,7 +525,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>780.960725</td>
+      <td>707.661322</td>
     </tr>
     <tr>
       <th>5</th>
@@ -506,7 +533,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>418.337093</td>
+      <td>415.185617</td>
     </tr>
     <tr>
       <th>6</th>
@@ -514,7 +541,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>453.806666</td>
+      <td>414.181413</td>
     </tr>
     <tr>
       <th>7</th>
@@ -522,7 +549,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>403.769000</td>
+      <td>749.951112</td>
     </tr>
     <tr>
       <th>8</th>
@@ -530,7 +557,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>657.886429</td>
+      <td>812.000914</td>
     </tr>
     <tr>
       <th>9</th>
@@ -538,7 +565,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>165.095569</td>
+      <td>588.639080</td>
     </tr>
   </tbody>
 </table>
@@ -554,8 +581,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  hue<span class="op">=</span><span class="st">"subj_id"</span>,</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  kind<span class="op">=</span><span class="st">"point"</span></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="9">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x1e48922f688&gt;</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x1bca01a5908&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="python_files/figure-html/cell-10-output-2.png" width="527" height="464"></p>
@@ -566,7 +593,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>md <span class="op">=</span> smf.mixedlm(<span class="st">"RT ~ category"</span>, dat_sim, groups<span class="op">=</span>dat_sim[<span class="st">'subj_id'</span>],  re_formula<span class="op">=</span><span class="st">"~category"</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>mdf <span class="op">=</span> md.fit()</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>mdf.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="26">
 
 <table class="simpletable">
 <tbody><tr>
@@ -576,10 +603,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <td>No. Observations:</td>  <td>4000</td>         <td>Method:</td>          <td>REML</td>    
 </tr>
 <tr>
-     <td>No. Groups:</td>      <td>10</td>          <td>Scale:</td>        <td>31304.7050</td> 
+     <td>No. Groups:</td>      <td>10</td>          <td>Scale:</td>        <td>30038.7964</td> 
 </tr>
 <tr>
-  <td>Min. group size:</td>    <td>400</td>     <td>Log-Likelihood:</td>   <td>-26393.4270</td>
+  <td>Min. group size:</td>    <td>400</td>     <td>Log-Likelihood:</td>   <td>-26314.1142</td>
 </tr>
 <tr>
   <td>Max. group size:</td>    <td>400</td>       <td>Converged:</td>          <td>Yes</td>    
@@ -593,19 +620,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
                  <td></td>                   <th>Coef.</th>  <th>Std.Err.</th>    <th>z</th>   <th>P&gt;|z|</th> <th>[0.025</th>  <th>0.975]</th> 
 </tr>
 <tr>
-  <th>Intercept</th>                        <td>639.313</td>  <td>23.865</td>  <td>26.788</td> <td>0.000</td> <td>592.538</td> <td>686.089</td>
+  <th>Intercept</th>                        <td>612.437</td>  <td>25.655</td>  <td>23.872</td> <td>0.000</td> <td>562.154</td> <td>662.720</td>
 </tr>
 <tr>
-  <th>category[T.present]</th>              <td>25.278</td>    <td>6.811</td>   <td>3.711</td> <td>0.000</td> <td>11.928</td>  <td>38.628</td> 
+  <th>category[T.present]</th>              <td>38.225</td>    <td>8.210</td>   <td>4.656</td> <td>0.000</td> <td>22.134</td>  <td>54.316</td> 
 </tr>
 <tr>
-  <th>Group Var</th>                       <td>5539.037</td>  <td>15.196</td>     <td></td>      <td></td>       <td></td>        <td></td>    
+  <th>Group Var</th>                       <td>6431.544</td>  <td>17.934</td>     <td></td>      <td></td>       <td></td>        <td></td>    
 </tr>
 <tr>
-  <th>Group x category[T.present] Cov</th> <td>-517.669</td>   <td>3.318</td>     <td></td>      <td></td>       <td></td>        <td></td>    
+  <th>Group x category[T.present] Cov</th>  <td>725.916</td>   <td>4.201</td>     <td></td>      <td></td>       <td></td>        <td></td>    
 </tr>
 <tr>
-  <th>category[T.present] Var</th>          <td>150.885</td>   <td>1.238</td>     <td></td>      <td></td>       <td></td>        <td></td>    
+  <th>category[T.present] Var</th>          <td>373.641</td>   <td>1.835</td>     <td></td>      <td></td>       <td></td>        <td></td>    
 </tr>
 </tbody></table>
 </div>
@@ -721,7 +748,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>      mean_estimate <span class="op">=</span> (<span class="st">'Coef.'</span>,<span class="st">'mean'</span>),</span>
 <span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>      mean_se <span class="op">=</span> (<span class="st">'Coef.'</span>, <span class="st">'sem'</span>),</span>
 <span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>      power <span class="op">=</span> (<span class="st">'power'</span>, <span class="st">'mean'</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="29">
 
 <div>
 
@@ -743,15 +770,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <tbody>
     <tr>
       <th>Intercept</th>
-      <td>639.46148</td>
-      <td>4.077712</td>
+      <td>633.27521</td>
+      <td>3.172399</td>
       <td>1.00</td>
     </tr>
     <tr>
       <th>category[T.present]</th>
-      <td>29.27915</td>
-      <td>1.130166</td>
-      <td>0.64</td>
+      <td>29.84433</td>
+      <td>1.120568</td>
+      <td>0.69</td>
     </tr>
   </tbody>
 </table>
@@ -796,7 +823,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sns.regplot(x<span class="op">=</span>power1.index, y<span class="op">=</span>power1[<span class="st">"power"</span>],lowess<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="16">
+<div class="cell-output cell-output-display" data-execution_count="32">
 <pre><code>&lt;AxesSubplot:xlabel='n_subj', ylabel='power'&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
