@@ -199,8 +199,9 @@ mf2 = fit(MixedModel, simformula, dat_sim)
 
 Great, our simulation works - our fixed effect parameter estimates are close to the originals, and statistically significant! Now for a power analysis, we'd put the above in functions and run the code many times for a given combination of parameters. See below:
 
-```{python}
-def my_sim_data(
+```{julia}
+
+function my_sim_data(;
   n_subj     = 5,   # number of subjects
   n_present  = 200,   # number of distractor present trials
   n_absent   = 200,   # number of distractor absent
@@ -209,160 +210,180 @@ def my_sim_data(
   tau_0      = 80,   # by-subject random intercept sd
   tau_1      = 15,   # by-subject random slope sd
   rho        = 0.35,   # correlation between intercept and slope
-  sigma      = 175
-  ):
+  sigma      = 175 
+)
   
-
   # simulate a sample of items
   # total number of items = n_ingroup + n_outgroup
-  items = (pd.DataFrame({
-  'item_id': range(n_absent+n_present),
-  'category' : np.repeat(['absent', 'present'], [n_absent, n_present])
-})
-  .assign(X_i=lambda x: np.where(x["category"] == 'present', 0.5, -0.5)))
 
+  items = @chain DataFrame(
+    :item_id => range(1,n_absent+n_present),
+    :category => [repeat(["absent"],n_absent)..., repeat(["present"], n_present)...]
+  ) begin
+    @rtransform :X_i = :category == "present" ? 0.5 : -0.5
+  end
 
-  # simulate a sample of subjects
+  #simulate a sample of subjects
 
-  # calculate random intercept / random slope covariance
+  #calculate random intercept / random slope covariance
   covar = rho * tau_0 * tau_1
 
-  # put values into variance-covariance matrix
-  cov_mx = np.array([
-    [tau_0**2, covar], 
-    [covar, tau_1**2]
-  ])
+  #put values into variance-covariance matrix
+  cov_mx = [tau_0^2 covar; covar tau_1^2]
 
-  # generate the by-subject random effects
-  subject_rfx = np.random.multivariate_normal(mean = [0, 0], cov = cov_mx, size = n_subj)
+  #generate the by-subject random effects
+  dist = MvNormal([0, 0], cov_mx)
+  subject_rfx = rand(dist, n_subj)
 
-  # combine with subject IDs
-  subjects = pd.DataFrame({
-    'subj_id': range(n_subj),
-    'T_0s': subject_rfx[:,0],
-    'T_1s': subject_rfx[:,1]
-  })
+  # # combine with subject IDs
 
-  #cross items and subjects, add noise
-  items['key'] = 1
-  subjects['key'] = 1
-  trials = (pd
-    .merge(items,subjects, on='key').drop("key",axis=1)
-    .assign(e_si = lambda x: np.random.normal(scale=sigma,size=len(x))))
+  subjects = DataFrame(
+    :subj_id => string.(range(1,n_subj)),
+    :T_0s => subject_rfx[1,:],
+    :T_1s => subject_rfx[2,:]
+  )
 
+  dat_sim = @chain crossjoin(subjects,items) begin
+    @rtransform @astable begin
+      :e_si = rand(Normal(0, sigma), 1)[1]
+      #calculate response variable
+      :RT = beta_0 + :T_0s + (beta_1 + :T_1s) * :X_i + :e_si
+      end
+    @select(:subj_id, :item_id, :category, :X_i, :RT)
+  end
+  
+  dat_sim
+end
 
-  # calculate the response variable
-  dat_sim = (trials
-    .assign(RT = lambda x: beta_0 + x.T_0s + (beta_1 + x.T_1s) * x.X_i + x.e_si)
-    .filter(items=['subj_id', 'item_id', 'category', 'X_i', 'RT']))
-
-  return dat_sim
 ```
 
 The above function simulates data. The function below combines it with a model fit so we have a function that can be repeatedly called during our power analysis.
 
-```{python}
+```{julia}
 
-def single_run(filename = None, *args, **kwargs):
-  dat_sim = my_sim_data(*args, **kwargs)
-  with warnings.catch_warnings(record=True) as w:
-    warnings.simplefilter("ignore")
-    md = smf.mixedlm("RT ~ category", dat_sim, groups=dat_sim['subj_id'], re_formula="~category")
-    mod_sim = md.fit()
-  sim_results = (mod_sim
-    .summary()
-    .tables[1]
-    .assign(**kwargs))
-  sim_results = sim_results.apply(pd.to_numeric, errors='coerce')
-  sim_results.index.rename('i',inplace=True)
-
-  if not filename == None:
-    hdr = not os.path.isfile(filename)
-    sim_results.to_csv(filename, mode='a',header=hdr)
+function single_run(filename = nothing, args...; kwargs...)
   
-  return sim_results
+  dat_sim = my_sim_data(;kwargs...)
+  simformula = @formula(RT ~ 1 + category + (1 + category | subj_id))
+  mf = fit(MixedModel, simformula, dat_sim) 
+  sim_results = DataFrame(coeftable(mf))
+  if length([kwargs...]) != 0
+    sim_results = crossjoin(sim_results,DataFrame(kwargs...))
+  end
+  
+  if !isnothing(filename)
+    append = isfile(filename)
+    CSV.write(filename, sim_results, append = append)
+  end  
+  sim_results
+end
+
 ```
 
-Now let's run our sensitivity analysis - we will run our simulation many times (100 times here for speed, but aim for more, like 1000+) for each combination of parameters, and record how often the fixed effect estimates reach significance:
-```{python}
-nreps = 100
+Now let's run our sensitivity analysis - we will run our simulation many times (1000+ times, which we can show here because of Julia's blazing speed) for each combination of parameters, and record how often the fixed effect estimates reach significance:
+```{julia}
 
-params = ParameterGrid({
-  'n_subj'     : [5], # number of subjects
-  'n_present'  : [150],   # number of distractor present trials
-  'n_absent'   : [150],   # number of distractor absent
-  'beta_0'     : [650],   # grand mean
-  'beta_1'     : [30],   # effect of category
-  'tau_0'      : [80],   # by-subject random intercept sd
-  'tau_1'      : [15],   # by-subject random slope sd
-  'rho'        : [0.35],   # correlation between intercept and slope
-  'sigma'      : [175]  # residual (standard deviation)
-})
+nreps = 1000
 
-sims = pd.concat([single_run(**param) for param in params for i in range(nreps)])
+params = allcombinations(
+  DataFrame,
+  :rep        => 1:nreps, # number of runs
+  :n_subj     => 8, # number of subjects
+  :n_present  => 150,   # number of distractor present trials
+  :n_absent   => 150,   # number of distractor absent
+  :beta_0     => 650,   # grand mean
+  :beta_1     => 30,   # effect of category
+  :tau_0      => 80,   # by-subject random intercept sd
+  :tau_1      => 15,   # by-subject random slope sd
+  :rho        => 0.35,   # correlation between intercept and slope
+  :sigma      => 175  # residual (standard deviation)
+)
 
+select!(params,Not("rep"))
 
-  
-alpha = 0.05
+alpha = .05
 
-(sims
-  .assign(power = sims['P>|z|'] < alpha)
-  .query('i=="Intercept" or i=="category[T.present]"')
-  .groupby(['i'])
-  .agg(
-      mean_estimate = ('Coef.','mean'),
-      mean_se = ('Coef.', 'sem'),
-      power = ('power', 'mean')))
+sims = vcat([single_run(;r...) for r in Tables.rowtable(params)]...)
+
+@chain sims begin
+  @select(:Name, $"Pr(>|z|)")
+  @transform :p = $"Pr(>|z|)" .< alpha
+  groupby(:Name)
+  @combine :power = mean(:p)
+end
+
 ```
 
 If we want to run our sensitivity analysis across a given parameter space, we'll have to map the function single_run to generate data across this space, for example, over a varying number of participants:
 
-```{python}
-filename1 = "sens_py.csv"
-nreps = 100
+```{julia}
+filename1 = "sens_jl.csv"
 
-params = ParameterGrid({
-  'n_subj'     : range(2,10), # number of subjects
-  'n_present'  : [150],   # number of distractor present trials
-  'n_absent'   : [150],   # number of distractor absent
-  'beta_0'     : [650],   # grand mean
-  'beta_1'     : [30],   # effect of category
-  'tau_0'      : [80],   # by-subject random intercept sd
-  'tau_1'      : [15],   # by-subject random slope sd
-  'rho'        : [0.35],   # correlation between intercept and slope
-  'sigma'      : [175]  # residual (standard deviation)
-})
+nreps = 1000
 
+params = allcombinations(
+  DataFrame,
+  :rep        => 1:nreps, # number of runs
+  :n_subj     => 2:15, # number of subjects
+  :n_present  => 150,   # number of distractor present trials
+  :n_absent   => 150,   # number of distractor absent
+  :beta_0     => 650,   # grand mean
+  :beta_1     => 30,   # effect of category
+  :tau_0      => 80,   # by-subject random intercept sd
+  :tau_1      => 15,   # by-subject random slope sd
+  :rho        => 0.35,   # correlation between intercept and slope
+  :sigma      => 175  # residual (standard deviation)
+)
 
+select!(params,Not("rep"))
 
-if not os.path.isfile(filename1):
-  # run a simulation for each row of params
-  # and save to a file on each rep
-  sims1 = pd.concat([single_run(**param, filename=filename1) for param in params for i in range(nreps)])
+alpha = 0.05
+
+if !isfile(filename1)
+  sims = vcat([single_run(filename1; r...) for r in Tables.rowtable(params)]...)
+end
+
 
 ```
 
 Note that the above could obviously also be run over other dimensions of our parameter space, e.g. for different estimates of the fixed effects, amount of noise, number of trials, etc. etc., by changing the `params` list.
 How did we do? Let's take a look at our power curve.
 
-```{python}
+```{julia}
 
+sims1 = CSV.read("sens_jl.csv", DataFrame)
 
-sims1 = pd.read_csv('sens_py.csv')
-
-power1 = (sims1.assign(power = sims1['P>|z|'] < alpha)
-  .query('i=="category[T.present]"')\
-  .groupby(['n_subj'])\
-  .agg(
-    mean_estimate = ('Coef.','mean'),
-    mean_se = ('Coef.', 'sem'),
-    power = ('power', 'mean')))
+power1 = @chain sims1 begin
+  @subset :Name .== "category: present"
+  @transform :p = $"Pr(>|z|)" .< alpha
+  groupby([:Name, :n_subj])
+  @combine begin
+  :mean_estimate = mean($"Coef.")
+  :mean_se = mean($"Std. Error")
+  :power = mean(:p)  
+  end
+end
 
 ```
 
-```{python}
+```{julia}
 
-sns.regplot(x=power1.index, y=power1["power"],lowess=True)
+plot(
+  power1,
+  layer(
+    x=:n_subj,
+    y=:power,
+    Geom.smooth,
+    yintercept=[0.8],
+    Geom.hline
+  ),
+  layer(
+    x=:n_subj,
+    y=:power,
+    Geom.point
+  )
+)
+
 
 ```
 
@@ -370,7 +391,7 @@ Our power analysis suggests that, with the parameters established above, we need
 
 The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see [this blog post](https://solomonkurz.netlify.app/post/bayesian-power-analysis-part-i/)).
 
-Even if the above code is spaghetti to you ([Perhaps you prefer R?](index.qmd)), I hope you will take away a few things from this tutorial:
+Even if the above code is spaghetti to you ([Perhaps you prefer R?](index.qmd) [Or Python?](python.qmd)), I hope you will take away a few things from this tutorial:
 
 - Power analysis is nothing more than testing whether we can recover the parameters of a hypothesised data-generating process reliably using our statistical test of choice.
 - We can determine the parameters for such a data-generating process in the same way we formulate hypotheses (and indeed, *in some ways these two things are one and the same*): we use our knowledge, intuition, and previous work to inform our decision-making.

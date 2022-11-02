@@ -10,3 +10,5 @@ website:
         file: index.qmd
       - text: "Python version"
         file: python.qmd
+      - text: "Julia version"
+        file: julia.qmd
