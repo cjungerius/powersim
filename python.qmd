@@ -23,6 +23,9 @@ import statsmodels.formula.api as smf
 import itertools
 import glob, os, warnings
 from sklearn.model_selection import ParameterGrid
+
+import random
+random.seed(90059)
 ```
 
 In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study from the Serences lab purpose-built to be used for sensitivity analysis. First let's import the data for our specific case from the [Adam et al. (2021)](https://www.journalofcognition.org/articles/10.5334/joc.182/) study, which is freely available [in an OSF repository](https://osf.io/u7wvy/), and look at the data.
@@ -81,7 +84,7 @@ n_subj     = 10   # number of subjects
 n_present  = 200   # number of distractor present trials
 n_absent   = 200   # number of distractor absent
 beta_0     = 650   # grand mean
-beta_1     = 30   # effect of category
+beta_1     = 30   # effect of distractor presence
 tau_0      = 80   # by-subject random intercept sd
 tau_1      = 15   # by-subject random slope sd
 rho        = 0.35   # correlation between intercept and slope
@@ -96,9 +99,8 @@ Generate trials with their fixed effects:
 
 items = (pd
   .DataFrame({
-    'item_id': range(n_absent+n_present),
-    'category' : np.repeat(['absent', 'present'], [n_absent, n_present])})
-  .assign(X_i=lambda x: np.where(x["category"] == 'present', 0.5, -0.5)))
+    'distractor' : np.repeat(['absent', 'present'], [n_absent, n_present])})
+  .assign(X_i=lambda x: np.where(x["distractor"] == 'present', 0.5, -0.5)))
 
 items.describe()
 ```
@@ -146,7 +148,7 @@ trials = (pd
 # calculate the response variable
 dat_sim = (trials
   .assign(RT = lambda x: beta_0 + x.T_0s + (beta_1 + x.T_1s) * x.X_i + x.e_si)
-  .filter(items=['subj_id', 'item_id', 'category', 'X_i', 'RT']))
+  .filter(items=['subj_id', 'distractor', 'X_i', 'RT']))
 
 dat_sim.head(10)
 ```
@@ -157,7 +159,7 @@ Data generated! Does it look like we'd expect?
 
 sns.catplot(
   data=dat_sim,
-  x="category",
+  x="distractor",
   y="RT",
   hue="subj_id",
   kind="point"
@@ -168,7 +170,7 @@ sns.catplot(
 Looks comparable to the original data! Now let's fit a model to see if we recover the parameters:
 
 ```{python}
-md = smf.mixedlm("RT ~ category", dat_sim, groups=dat_sim['subj_id'],  re_formula="~category")
+md = smf.mixedlm("RT ~ distractor", dat_sim, groups=dat_sim['subj_id'],  re_formula="~distractor")
 mdf = md.fit()
 mdf.summary()
 ```
@@ -181,7 +183,7 @@ def my_sim_data(
   n_present  = 200,   # number of distractor present trials
   n_absent   = 200,   # number of distractor absent
   beta_0     = 650,   # grand mean
-  beta_1     = 30,   # effect of category
+  beta_1     = 30,   # effect of distractor presence
   tau_0      = 80,   # by-subject random intercept sd
   tau_1      = 15,   # by-subject random slope sd
   rho        = 0.35,   # correlation between intercept and slope
@@ -192,10 +194,9 @@ def my_sim_data(
   # simulate a sample of items
   # total number of items = n_ingroup + n_outgroup
   items = (pd.DataFrame({
-  'item_id': range(n_absent+n_present),
-  'category' : np.repeat(['absent', 'present'], [n_absent, n_present])
+  'distractor' : np.repeat(['absent', 'present'], [n_absent, n_present])
 })
-  .assign(X_i=lambda x: np.where(x["category"] == 'present', 0.5, -0.5)))
+  .assign(X_i=lambda x: np.where(x["distractor"] == 'present', 0.5, -0.5)))
 
 
   # simulate a sample of subjects
@@ -230,7 +231,7 @@ def my_sim_data(
   # calculate the response variable
   dat_sim = (trials
     .assign(RT = lambda x: beta_0 + x.T_0s + (beta_1 + x.T_1s) * x.X_i + x.e_si)
-    .filter(items=['subj_id', 'item_id', 'category', 'X_i', 'RT']))
+    .filter(items=['subj_id', 'distractor', 'X_i', 'RT']))
 
   return dat_sim
 ```
@@ -243,7 +244,7 @@ def single_run(filename = None, *args, **kwargs):
   dat_sim = my_sim_data(*args, **kwargs)
   with warnings.catch_warnings(record=True) as w:
     warnings.simplefilter("ignore")
-    md = smf.mixedlm("RT ~ category", dat_sim, groups=dat_sim['subj_id'], re_formula="~category")
+    md = smf.mixedlm("RT ~ distractor", dat_sim, groups=dat_sim['subj_id'], re_formula="~distractor")
     mod_sim = md.fit()
   sim_results = (mod_sim
     .summary()
@@ -268,7 +269,7 @@ params = ParameterGrid({
   'n_present'  : [150],   # number of distractor present trials
   'n_absent'   : [150],   # number of distractor absent
   'beta_0'     : [650],   # grand mean
-  'beta_1'     : [30],   # effect of category
+  'beta_1'     : [30],   # effect of distractor presence
   'tau_0'      : [80],   # by-subject random intercept sd
   'tau_1'      : [15],   # by-subject random slope sd
   'rho'        : [0.35],   # correlation between intercept and slope
@@ -283,7 +284,7 @@ alpha = 0.05
 
 (sims
   .assign(power = sims['P>|z|'] < alpha)
-  .query('i=="Intercept" or i=="category[T.present]"')
+  .query('i=="Intercept" or i=="distractor[T.present]"')
   .groupby(['i'])
   .agg(
       mean_estimate = ('Coef.','mean'),
@@ -295,10 +296,10 @@ If we want to run our sensitivity analysis across a given parameter space, we'll
 
 ```{python}
 filename1 = "sens_py.csv"
-nreps = 100
+nreps = 1000
 
 params = ParameterGrid({
-  'n_subj'     : range(2,10), # number of subjects
+  'n_subj'     : range(2,15), # number of subjects
   'n_present'  : [150],   # number of distractor present trials
   'n_absent'   : [150],   # number of distractor absent
   'beta_0'     : [650],   # grand mean
@@ -327,7 +328,7 @@ How did we do? Let's take a look at our power curve.
 sims1 = pd.read_csv('sens_py.csv')
 
 power1 = (sims1.assign(power = sims1['P>|z|'] < alpha)
-  .query('i=="category[T.present]"')\
+  .query('i=="distractor[T.present]"')\
   .groupby(['n_subj'])\
   .agg(
     mean_estimate = ('Coef.','mean'),

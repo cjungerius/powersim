@@ -199,7 +199,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> glob, os, warnings</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> ParameterGrid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> ParameterGrid</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">90059</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study from the Serences lab purpose-built to be used for sensitivity analysis. First let’s import the data for our specific case from the <a href="https://www.journalofcognition.org/articles/10.5334/joc.182/">Adam et al.&nbsp;(2021)</a> study, which is freely available <a href="https://osf.io/u7wvy/">in an OSF repository</a>, and look at the data.</p>
 <p>Note that when previous data doesn’t exist (or even if it does, but you don’t trust that it’s sufficient to base your effect estimates on) there are alternative ways of determining such parameters, including <a href="https://journals.sagepub.com/doi/full/10.1177/2515245918770963">formally determining a smallest effect size of interest</a>.</p>
@@ -224,8 +227,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  hue<span class="op">=</span><span class="st">"subject"</span>,</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  kind<span class="op">=</span><span class="st">"point"</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x2b60098a848&gt;</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x1523f7b8ca0&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="python_files/figure-html/cell-4-output-2.png" width="533" height="557"></p>
@@ -242,7 +245,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>md <span class="op">=</span> smf.mixedlm(<span class="st">"rt ~ distractor"</span>, d, groups<span class="op">=</span>d[<span class="st">'subject'</span>],re_formula<span class="op">=</span><span class="st">"~distractor"</span>)</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>mdf <span class="op">=</span> md.fit()</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>mdf.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="20">
 
 <table class="simpletable">
 <tbody><tr>
@@ -292,7 +295,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>n_present  <span class="op">=</span> <span class="dv">200</span>   <span class="co"># number of distractor present trials</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>n_absent   <span class="op">=</span> <span class="dv">200</span>   <span class="co"># number of distractor absent</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>beta_0     <span class="op">=</span> <span class="dv">650</span>   <span class="co"># grand mean</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>beta_1     <span class="op">=</span> <span class="dv">30</span>   <span class="co"># effect of category</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>beta_1     <span class="op">=</span> <span class="dv">30</span>   <span class="co"># effect of distractor presence</span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>tau_0      <span class="op">=</span> <span class="dv">80</span>   <span class="co"># by-subject random intercept sd</span></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>tau_1      <span class="op">=</span> <span class="dv">15</span>   <span class="co"># by-subject random slope sd</span></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>rho        <span class="op">=</span> <span class="fl">0.35</span>   <span class="co"># correlation between intercept and slope</span></span>
@@ -305,12 +308,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> (pd</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  .DataFrame({</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'item_id'</span>: <span class="bu">range</span>(n_absent<span class="op">+</span>n_present),</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'category'</span> : np.repeat([<span class="st">'absent'</span>, <span class="st">'present'</span>], [n_absent, n_present])})</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  .assign(X_i<span class="op">=</span><span class="kw">lambda</span> x: np.where(x[<span class="st">"category"</span>] <span class="op">==</span> <span class="st">'present'</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)))</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>items.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'distractor'</span> : np.repeat([<span class="st">'absent'</span>, <span class="st">'present'</span>], [n_absent, n_present])})</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  .assign(X_i<span class="op">=</span><span class="kw">lambda</span> x: np.where(x[<span class="st">"distractor"</span>] <span class="op">==</span> <span class="st">'present'</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)))</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>items.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
 
 <div>
 
@@ -318,7 +320,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <thead>
     <tr>
       <th></th>
-      <th>item_id</th>
       <th>X_i</th>
     </tr>
   </thead>
@@ -326,41 +327,33 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <tr>
       <th>count</th>
       <td>400.000000</td>
-      <td>400.000000</td>
     </tr>
     <tr>
       <th>mean</th>
-      <td>199.500000</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>std</th>
-      <td>115.614301</td>
       <td>0.500626</td>
     </tr>
     <tr>
       <th>min</th>
-      <td>0.000000</td>
       <td>-0.500000</td>
     </tr>
     <tr>
       <th>25%</th>
-      <td>99.750000</td>
       <td>-0.500000</td>
     </tr>
     <tr>
       <th>50%</th>
-      <td>199.500000</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>75%</th>
-      <td>299.250000</td>
       <td>0.500000</td>
     </tr>
     <tr>
       <th>max</th>
-      <td>399.000000</td>
       <td>0.500000</td>
     </tr>
   </tbody>
@@ -392,7 +385,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>subjects.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
+<div class="cell-output cell-output-display" data-execution_count="23">
 
 <div>
 
@@ -415,44 +408,44 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <tr>
       <th>mean</th>
       <td>4.50000</td>
-      <td>-2.497345</td>
-      <td>-1.046334</td>
+      <td>-10.172836</td>
+      <td>1.945666</td>
     </tr>
     <tr>
       <th>std</th>
       <td>3.02765</td>
-      <td>89.723248</td>
-      <td>10.882602</td>
+      <td>65.468750</td>
+      <td>12.558425</td>
     </tr>
     <tr>
       <th>min</th>
       <td>0.00000</td>
-      <td>-151.672503</td>
-      <td>-15.647540</td>
+      <td>-137.411933</td>
+      <td>-11.146985</td>
     </tr>
     <tr>
       <th>25%</th>
       <td>2.25000</td>
-      <td>-70.234383</td>
-      <td>-8.316924</td>
+      <td>-24.104853</td>
+      <td>-6.298554</td>
     </tr>
     <tr>
       <th>50%</th>
       <td>4.50000</td>
-      <td>2.051978</td>
-      <td>-3.066226</td>
+      <td>-4.675470</td>
+      <td>-0.588803</td>
     </tr>
     <tr>
       <th>75%</th>
       <td>6.75000</td>
-      <td>59.164272</td>
-      <td>6.633961</td>
+      <td>36.586303</td>
+      <td>5.945646</td>
     </tr>
     <tr>
       <th>max</th>
       <td>9.00000</td>
-      <td>134.285709</td>
-      <td>16.773892</td>
+      <td>70.318190</td>
+      <td>30.092354</td>
     </tr>
   </tbody>
 </table>
@@ -473,10 +466,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the response variable</span></span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>dat_sim <span class="op">=</span> (trials</span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  .assign(RT <span class="op">=</span> <span class="kw">lambda</span> x: beta_0 <span class="op">+</span> x.T_0s <span class="op">+</span> (beta_1 <span class="op">+</span> x.T_1s) <span class="op">*</span> x.X_i <span class="op">+</span> x.e_si)</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  .<span class="bu">filter</span>(items<span class="op">=</span>[<span class="st">'subj_id'</span>, <span class="st">'item_id'</span>, <span class="st">'category'</span>, <span class="st">'X_i'</span>, <span class="st">'RT'</span>]))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  .<span class="bu">filter</span>(items<span class="op">=</span>[<span class="st">'subj_id'</span>, <span class="st">'distractor'</span>, <span class="st">'X_i'</span>, <span class="st">'RT'</span>]))</span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>dat_sim.head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="24">
 
 <div>
 
@@ -485,8 +478,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <tr>
       <th></th>
       <th>subj_id</th>
-      <th>item_id</th>
-      <th>category</th>
+      <th>distractor</th>
       <th>X_i</th>
       <th>RT</th>
     </tr>
@@ -495,82 +487,72 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <tr>
       <th>0</th>
       <td>0</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>1118.192710</td>
+      <td>603.803192</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>503.719855</td>
+      <td>852.748796</td>
     </tr>
     <tr>
       <th>2</th>
       <td>2</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>729.969596</td>
+      <td>763.880137</td>
     </tr>
     <tr>
       <th>3</th>
       <td>3</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>721.213689</td>
+      <td>644.216269</td>
     </tr>
     <tr>
       <th>4</th>
       <td>4</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>855.900025</td>
+      <td>699.880498</td>
     </tr>
     <tr>
       <th>5</th>
       <td>5</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>585.110953</td>
+      <td>549.593374</td>
     </tr>
     <tr>
       <th>6</th>
       <td>6</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>569.520883</td>
+      <td>704.379165</td>
     </tr>
     <tr>
       <th>7</th>
       <td>7</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>602.883967</td>
+      <td>776.646274</td>
     </tr>
     <tr>
       <th>8</th>
       <td>8</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>781.277511</td>
+      <td>699.010075</td>
     </tr>
     <tr>
       <th>9</th>
       <td>9</td>
-      <td>0</td>
       <td>absent</td>
       <td>-0.5</td>
-      <td>685.759079</td>
+      <td>396.605970</td>
     </tr>
   </tbody>
 </table>
@@ -581,13 +563,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sns.catplot(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  data<span class="op">=</span>dat_sim,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  x<span class="op">=</span><span class="st">"category"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  x<span class="op">=</span><span class="st">"distractor"</span>,</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  y<span class="op">=</span><span class="st">"RT"</span>,</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  hue<span class="op">=</span><span class="st">"subj_id"</span>,</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  kind<span class="op">=</span><span class="st">"point"</span></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="9">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x2b6034c7148&gt;</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x1523db93dc0&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="python_files/figure-html/cell-10-output-2.png" width="527" height="464"></p>
@@ -595,10 +577,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <p>Looks comparable to the original data! Now let’s fit a model to see if we recover the parameters:</p>
 <div class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>md <span class="op">=</span> smf.mixedlm(<span class="st">"RT ~ category"</span>, dat_sim, groups<span class="op">=</span>dat_sim[<span class="st">'subj_id'</span>],  re_formula<span class="op">=</span><span class="st">"~category"</span>)</span>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>md <span class="op">=</span> smf.mixedlm(<span class="st">"RT ~ distractor"</span>, dat_sim, groups<span class="op">=</span>dat_sim[<span class="st">'subj_id'</span>],  re_formula<span class="op">=</span><span class="st">"~distractor"</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>mdf <span class="op">=</span> md.fit()</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>mdf.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="26">
 
 <table class="simpletable">
 <tbody><tr>
@@ -608,10 +590,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <td>No. Observations:</td>  <td>4000</td>         <td>Method:</td>          <td>REML</td>    
 </tr>
 <tr>
-     <td>No. Groups:</td>      <td>10</td>          <td>Scale:</td>        <td>30242.2997</td> 
+     <td>No. Groups:</td>      <td>10</td>          <td>Scale:</td>        <td>29489.8893</td> 
 </tr>
 <tr>
-  <td>Min. group size:</td>    <td>400</td>     <td>Log-Likelihood:</td>   <td>-26328.8800</td>
+  <td>Min. group size:</td>    <td>400</td>     <td>Log-Likelihood:</td>   <td>-26274.7743</td>
 </tr>
 <tr>
   <td>Max. group size:</td>    <td>400</td>       <td>Converged:</td>          <td>Yes</td>    
@@ -622,22 +604,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </tbody></table>
 <table class="simpletable">
 <tbody><tr>
-                 <td></td>                   <th>Coef.</th>  <th>Std.Err.</th>    <th>z</th>   <th>P&gt;|z|</th> <th>[0.025</th>  <th>0.975]</th> 
+                  <td></td>                    <th>Coef.</th>  <th>Std.Err.</th>    <th>z</th>   <th>P&gt;|z|</th> <th>[0.025</th>  <th>0.975]</th> 
 </tr>
 <tr>
-  <th>Intercept</th>                        <td>635.906</td>  <td>25.972</td>  <td>24.484</td> <td>0.000</td> <td>585.002</td> <td>686.811</td>
+  <th>Intercept</th>                          <td>624.157</td>  <td>19.304</td>  <td>32.333</td> <td>0.000</td> <td>586.322</td> <td>661.993</td>
 </tr>
 <tr>
-  <th>category[T.present]</th>              <td>27.370</td>    <td>9.190</td>   <td>2.978</td> <td>0.003</td>  <td>9.358</td>  <td>45.382</td> 
+  <th>distractor[T.present]</th>              <td>30.499</td>    <td>7.828</td>   <td>3.896</td> <td>0.000</td> <td>15.156</td>  <td>45.841</td> 
 </tr>
 <tr>
-  <th>Group Var</th>                       <td>6594.342</td>  <td>18.316</td>     <td></td>      <td></td>       <td></td>        <td></td>    
+  <th>Group Var</th>                         <td>3579.097</td>  <td>10.250</td>     <td></td>      <td></td>       <td></td>        <td></td>    
 </tr>
 <tr>
-  <th>Group x category[T.present] Cov</th>  <td>576.521</td>   <td>4.648</td>     <td></td>      <td></td>       <td></td>        <td></td>    
+  <th>Group x distractor[T.present] Cov</th>  <td>128.761</td>   <td>2.935</td>     <td></td>      <td></td>       <td></td>        <td></td>    
 </tr>
 <tr>
-  <th>category[T.present] Var</th>          <td>542.108</td>   <td>2.291</td>     <td></td>      <td></td>       <td></td>        <td></td>    
+  <th>distractor[T.present] Var</th>          <td>317.872</td>   <td>1.684</td>     <td></td>      <td></td>       <td></td>        <td></td>    
 </tr>
 </tbody></table>
 </div>
@@ -649,7 +631,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  n_present  <span class="op">=</span> <span class="dv">200</span>,   <span class="co"># number of distractor present trials</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  n_absent   <span class="op">=</span> <span class="dv">200</span>,   <span class="co"># number of distractor absent</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  beta_0     <span class="op">=</span> <span class="dv">650</span>,   <span class="co"># grand mean</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  beta_1     <span class="op">=</span> <span class="dv">30</span>,   <span class="co"># effect of category</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  beta_1     <span class="op">=</span> <span class="dv">30</span>,   <span class="co"># effect of distractor presence</span></span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  tau_0      <span class="op">=</span> <span class="dv">80</span>,   <span class="co"># by-subject random intercept sd</span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  tau_1      <span class="op">=</span> <span class="dv">15</span>,   <span class="co"># by-subject random slope sd</span></span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  rho        <span class="op">=</span> <span class="fl">0.35</span>,   <span class="co"># correlation between intercept and slope</span></span>
@@ -660,47 +642,46 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># simulate a sample of items</span></span>
 <span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># total number of items = n_ingroup + n_outgroup</span></span>
 <span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  items <span class="op">=</span> (pd.DataFrame({</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">'item_id'</span>: <span class="bu">range</span>(n_absent<span class="op">+</span>n_present),</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">'category'</span> : np.repeat([<span class="st">'absent'</span>, <span class="st">'present'</span>], [n_absent, n_present])</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  .assign(X_i<span class="op">=</span><span class="kw">lambda</span> x: np.where(x[<span class="st">"category"</span>] <span class="op">==</span> <span class="st">'present'</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)))</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">'distractor'</span> : np.repeat([<span class="st">'absent'</span>, <span class="st">'present'</span>], [n_absent, n_present])</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  .assign(X_i<span class="op">=</span><span class="kw">lambda</span> x: np.where(x[<span class="st">"distractor"</span>] <span class="op">==</span> <span class="st">'present'</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.5</span>)))</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># simulate a sample of subjects</span></span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate random intercept / random slope covariance</span></span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  covar <span class="op">=</span> rho <span class="op">*</span> tau_0 <span class="op">*</span> tau_1</span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># put values into variance-covariance matrix</span></span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  cov_mx <span class="op">=</span> np.array([</span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    [tau_0<span class="op">**</span><span class="dv">2</span>, covar], </span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    [covar, tau_1<span class="op">**</span><span class="dv">2</span>]</span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  ])</span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># generate the by-subject random effects</span></span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  subject_rfx <span class="op">=</span> np.random.multivariate_normal(mean <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">0</span>], cov <span class="op">=</span> cov_mx, size <span class="op">=</span> n_subj)</span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># combine with subject IDs</span></span>
-<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>  subjects <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">'subj_id'</span>: <span class="bu">range</span>(n_subj),</span>
-<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">'T_0s'</span>: subject_rfx[:,<span class="dv">0</span>],</span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">'T_1s'</span>: subject_rfx[:,<span class="dv">1</span>]</span>
-<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>  })</span>
-<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>  <span class="co">#cross items and subjects, add noise</span></span>
-<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>  items[<span class="st">'key'</span>] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>  subjects[<span class="st">'key'</span>] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>  trials <span class="op">=</span> (pd</span>
-<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    .merge(items,subjects, on<span class="op">=</span><span class="st">'key'</span>).drop(<span class="st">"key"</span>,axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>    .assign(e_si <span class="op">=</span> <span class="kw">lambda</span> x: np.random.normal(scale<span class="op">=</span>sigma,size<span class="op">=</span><span class="bu">len</span>(x))))</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># simulate a sample of subjects</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate random intercept / random slope covariance</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  covar <span class="op">=</span> rho <span class="op">*</span> tau_0 <span class="op">*</span> tau_1</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># put values into variance-covariance matrix</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  cov_mx <span class="op">=</span> np.array([</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    [tau_0<span class="op">**</span><span class="dv">2</span>, covar], </span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    [covar, tau_1<span class="op">**</span><span class="dv">2</span>]</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>  ])</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  <span class="co"># generate the by-subject random effects</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  subject_rfx <span class="op">=</span> np.random.multivariate_normal(mean <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">0</span>], cov <span class="op">=</span> cov_mx, size <span class="op">=</span> n_subj)</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># combine with subject IDs</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>  subjects <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">'subj_id'</span>: <span class="bu">range</span>(n_subj),</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">'T_0s'</span>: subject_rfx[:,<span class="dv">0</span>],</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">'T_1s'</span>: subject_rfx[:,<span class="dv">1</span>]</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>  <span class="co">#cross items and subjects, add noise</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>  items[<span class="st">'key'</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>  subjects[<span class="st">'key'</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>  trials <span class="op">=</span> (pd</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>    .merge(items,subjects, on<span class="op">=</span><span class="st">'key'</span>).drop(<span class="st">"key"</span>,axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    .assign(e_si <span class="op">=</span> <span class="kw">lambda</span> x: np.random.normal(scale<span class="op">=</span>sigma,size<span class="op">=</span><span class="bu">len</span>(x))))</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate the response variable</span></span>
-<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>  dat_sim <span class="op">=</span> (trials</span>
-<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>    .assign(RT <span class="op">=</span> <span class="kw">lambda</span> x: beta_0 <span class="op">+</span> x.T_0s <span class="op">+</span> (beta_1 <span class="op">+</span> x.T_1s) <span class="op">*</span> x.X_i <span class="op">+</span> x.e_si)</span>
-<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(items<span class="op">=</span>[<span class="st">'subj_id'</span>, <span class="st">'item_id'</span>, <span class="st">'category'</span>, <span class="st">'X_i'</span>, <span class="st">'RT'</span>]))</span>
-<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> dat_sim</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate the response variable</span></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>  dat_sim <span class="op">=</span> (trials</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>    .assign(RT <span class="op">=</span> <span class="kw">lambda</span> x: beta_0 <span class="op">+</span> x.T_0s <span class="op">+</span> (beta_1 <span class="op">+</span> x.T_1s) <span class="op">*</span> x.X_i <span class="op">+</span> x.e_si)</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(items<span class="op">=</span>[<span class="st">'subj_id'</span>, <span class="st">'distractor'</span>, <span class="st">'X_i'</span>, <span class="st">'RT'</span>]))</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> dat_sim</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The above function simulates data. The function below combines it with a model fit so we have a function that can be repeatedly called during our power analysis.</p>
 <div class="cell" data-execution_count="12">
@@ -708,7 +689,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  dat_sim <span class="op">=</span> my_sim_data(<span class="op">*</span>args, <span class="op">**</span>kwargs)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">with</span> warnings.catch_warnings(record<span class="op">=</span><span class="va">True</span>) <span class="im">as</span> w:</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    warnings.simplefilter(<span class="st">"ignore"</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    md <span class="op">=</span> smf.mixedlm(<span class="st">"RT ~ category"</span>, dat_sim, groups<span class="op">=</span>dat_sim[<span class="st">'subj_id'</span>], re_formula<span class="op">=</span><span class="st">"~category"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    md <span class="op">=</span> smf.mixedlm(<span class="st">"RT ~ distractor"</span>, dat_sim, groups<span class="op">=</span>dat_sim[<span class="st">'subj_id'</span>], re_formula<span class="op">=</span><span class="st">"~distractor"</span>)</span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    mod_sim <span class="op">=</span> md.fit()</span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  sim_results <span class="op">=</span> (mod_sim</span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    .summary()</span>
@@ -732,7 +713,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">'n_present'</span>  : [<span class="dv">150</span>],   <span class="co"># number of distractor present trials</span></span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">'n_absent'</span>   : [<span class="dv">150</span>],   <span class="co"># number of distractor absent</span></span>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">'beta_0'</span>     : [<span class="dv">650</span>],   <span class="co"># grand mean</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">'beta_1'</span>     : [<span class="dv">30</span>],   <span class="co"># effect of category</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">'beta_1'</span>     : [<span class="dv">30</span>],   <span class="co"># effect of distractor presence</span></span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">'tau_0'</span>      : [<span class="dv">80</span>],   <span class="co"># by-subject random intercept sd</span></span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">'tau_1'</span>      : [<span class="dv">15</span>],   <span class="co"># by-subject random slope sd</span></span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">'rho'</span>        : [<span class="fl">0.35</span>],   <span class="co"># correlation between intercept and slope</span></span>
@@ -747,13 +728,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>(sims</span>
 <span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  .assign(power <span class="op">=</span> sims[<span class="st">'P&gt;|z|'</span>] <span class="op">&lt;</span> alpha)</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  .query(<span class="st">'i=="Intercept" or i=="category[T.present]"'</span>)</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  .query(<span class="st">'i=="Intercept" or i=="distractor[T.present]"'</span>)</span>
 <span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  .groupby([<span class="st">'i'</span>])</span>
 <span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  .agg(</span>
 <span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>      mean_estimate <span class="op">=</span> (<span class="st">'Coef.'</span>,<span class="st">'mean'</span>),</span>
 <span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>      mean_se <span class="op">=</span> (<span class="st">'Coef.'</span>, <span class="st">'sem'</span>),</span>
 <span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>      power <span class="op">=</span> (<span class="st">'power'</span>, <span class="st">'mean'</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="29">
 
 <div>
 
@@ -775,15 +756,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <tbody>
     <tr>
       <th>Intercept</th>
-      <td>636.72503</td>
-      <td>3.395011</td>
+      <td>636.86777</td>
+      <td>3.497840</td>
       <td>1.00</td>
     </tr>
     <tr>
-      <th>category[T.present]</th>
-      <td>30.56743</td>
-      <td>1.032972</td>
-      <td>0.72</td>
+      <th>distractor[T.present]</th>
+      <td>29.63591</td>
+      <td>1.035199</td>
+      <td>0.66</td>
     </tr>
   </tbody>
 </table>
@@ -793,10 +774,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>If we want to run our sensitivity analysis across a given parameter space, we’ll have to map the function single_run to generate data across this space, for example, over a varying number of participants:</p>
 <div class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>filename1 <span class="op">=</span> <span class="st">"sens_py.csv"</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>nreps <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>nreps <span class="op">=</span> <span class="dv">1000</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> ParameterGrid({</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">'n_subj'</span>     : <span class="bu">range</span>(<span class="dv">2</span>,<span class="dv">10</span>), <span class="co"># number of subjects</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">'n_subj'</span>     : <span class="bu">range</span>(<span class="dv">2</span>,<span class="dv">15</span>), <span class="co"># number of subjects</span></span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">'n_present'</span>  : [<span class="dv">150</span>],   <span class="co"># number of distractor present trials</span></span>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">'n_absent'</span>   : [<span class="dv">150</span>],   <span class="co"># number of distractor absent</span></span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">'beta_0'</span>     : [<span class="dv">650</span>],   <span class="co"># grand mean</span></span>
@@ -819,7 +800,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sims1 <span class="op">=</span> pd.read_csv(<span class="st">'sens_py.csv'</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>power1 <span class="op">=</span> (sims1.assign(power <span class="op">=</span> sims1[<span class="st">'P&gt;|z|'</span>] <span class="op">&lt;</span> alpha)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  .query(<span class="st">'i=="category[T.present]"'</span>)<span class="op">\</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  .query(<span class="st">'i=="distractor[T.present]"'</span>)<span class="op">\</span></span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  .groupby([<span class="st">'n_subj'</span>])<span class="op">\</span></span>
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  .agg(</span>
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    mean_estimate <span class="op">=</span> (<span class="st">'Coef.'</span>,<span class="st">'mean'</span>),</span>
@@ -828,11 +809,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sns.regplot(x<span class="op">=</span>power1.index, y<span class="op">=</span>power1[<span class="st">"power"</span>],lowess<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="16">
-<pre><code>&lt;AxesSubplot:xlabel='n_subj', ylabel='power'&gt;</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="32">
+<pre><code>&lt;matplotlib.axes._subplots.AxesSubplot at 0x1523dc45fd0&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="python_files/figure-html/cell-17-output-2.png" width="593" height="435"></p>
+<p><img src="python_files/figure-html/cell-17-output-2.png" width="593" height="428"></p>
 </div>
 </div>
 <p>Our power analysis suggests that, with the parameters established above, we need ~8 or more participants to reliably detect an effect!</p>

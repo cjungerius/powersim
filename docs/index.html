@@ -192,7 +192,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse) <span class="co"># Data wrangling, plotting and general awesomeness</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmerTest) <span class="co"># Mixed modeling using lme4 with better support for tests</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom.mixed) <span class="co"># To make pretty tables</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr) <span class="co"># To print those pretty tables</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr) <span class="co"># To print those pretty tables</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">90095</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study from the Serences lab purpose-built to be used for sensitivity analysis. First let’s import the data for our specific case from the <a href="https://www.journalofcognition.org/articles/10.5334/joc.182/">Adam et al.&nbsp;(2021)</a> study, which is freely available <a href="https://osf.io/u7wvy/">in an OSF repository</a>, and look at the data.</p>
 <p>Note that when previous data doesn’t exist (or even if it does, but you don’t trust that it’s sufficient to base your effect estimates on) there are alternative ways of determining such parameters, including <a href="https://journals.sagepub.com/doi/full/10.1177/2515245918770963">formally determining a smallest effect size of interest</a>.</p>
@@ -426,33 +428,33 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">-7.984663</td>
-<td style="text-align: right;">-12.586927</td>
+<td style="text-align: right;">-0.8775374</td>
+<td style="text-align: right;">9.352598</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">-87.972500</td>
-<td style="text-align: right;">1.860574</td>
+<td style="text-align: right;">188.8512000</td>
+<td style="text-align: right;">1.329999</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">-18.825620</td>
-<td style="text-align: right;">-2.441588</td>
+<td style="text-align: right;">-9.0202775</td>
+<td style="text-align: right;">10.287091</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">95.343248</td>
-<td style="text-align: right;">13.772275</td>
+<td style="text-align: right;">41.6237474</td>
+<td style="text-align: right;">4.991510</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">88.520389</td>
-<td style="text-align: right;">11.441252</td>
+<td style="text-align: right;">94.5996488</td>
+<td style="text-align: right;">-1.831678</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">6</td>
-<td style="text-align: right;">98.919807</td>
-<td style="text-align: right;">15.040337</td>
+<td style="text-align: right;">-39.1712630</td>
+<td style="text-align: right;">11.821585</td>
 </tr>
 </tbody>
 </table>
@@ -487,37 +489,37 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">677.8532</td>
+<td style="text-align: right;">833.6217</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">477.8066</td>
+<td style="text-align: right;">416.7325</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">703.0033</td>
+<td style="text-align: right;">763.1212</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">420.4975</td>
+<td style="text-align: right;">794.4251</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">858.9024</td>
+<td style="text-align: right;">789.2463</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">present</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">492.1055</td>
+<td style="text-align: right;">421.8269</td>
 </tr>
 </tbody>
 </table>
@@ -557,10 +559,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <col style="width: 8%">
 <col style="width: 8%">
 <col style="width: 33%">
+<col style="width: 11%">
 <col style="width: 9%">
 <col style="width: 9%">
-<col style="width: 9%">
-<col style="width: 9%">
+<col style="width: 8%">
 <col style="width: 9%">
 </colgroup>
 <thead>
@@ -580,27 +582,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: left;">fixed</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">(Intercept)</td>
-<td style="text-align: right;">645.63823</td>
-<td style="text-align: right;">23.580966</td>
-<td style="text-align: right;">27.379634</td>
-<td style="text-align: right;">9.003762</td>
+<td style="text-align: right;">664.9892961</td>
+<td style="text-align: right;">25.529695</td>
+<td style="text-align: right;">26.047678</td>
+<td style="text-align: right;">8.996418</td>
 <td style="text-align: right;">0.0000000</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">fixed</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: left;">distractorpresent</td>
-<td style="text-align: right;">31.56300</td>
-<td style="text-align: right;">7.867184</td>
-<td style="text-align: right;">4.011982</td>
-<td style="text-align: right;">11.827036</td>
-<td style="text-align: right;">0.0017734</td>
+<td style="text-align: right;">32.2478316</td>
+<td style="text-align: right;">6.658046</td>
+<td style="text-align: right;">4.843438</td>
+<td style="text-align: right;">8.997403</td>
+<td style="text-align: right;">0.0009174</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">ran_pars</td>
 <td style="text-align: left;">subj_id</td>
 <td style="text-align: left;">sd__(Intercept)</td>
-<td style="text-align: right;">73.53785</td>
+<td style="text-align: right;">79.7886279</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -610,7 +612,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: left;">ran_pars</td>
 <td style="text-align: left;">subj_id</td>
 <td style="text-align: left;">cor__(Intercept).distractorpresent</td>
-<td style="text-align: right;">1.00000</td>
+<td style="text-align: right;">0.0012847</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -620,7 +622,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: left;">ran_pars</td>
 <td style="text-align: left;">subj_id</td>
 <td style="text-align: left;">sd__distractorpresent</td>
-<td style="text-align: right;">17.70077</td>
+<td style="text-align: right;">11.8506970</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -630,7 +632,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td style="text-align: left;">ran_pars</td>
 <td style="text-align: left;">Residual</td>
 <td style="text-align: left;">sd__Observation</td>
-<td style="text-align: right;">174.81663</td>
+<td style="text-align: right;">174.0277870</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -767,8 +769,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <pre><code># A tibble: 2 × 4
   term        mean_estimate mean_se power
   &lt;chr&gt;               &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
-1 (Intercept)         650.    23.5  1    
-2 X_i                  30.2    7.81 0.942</code></pre>
+1 (Intercept)         650.    23.5   1   
+2 X_i                  29.7    7.86  0.93</code></pre>
 </div>
 </div>
 <p>If we want to run our sensitivity analysis across a given parameter space, we’ll have to map the function single_run to generate data across this space, for example, over a varying number of participants:</p>
