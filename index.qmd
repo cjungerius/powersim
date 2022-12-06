@@ -9,7 +9,7 @@ warning: false
 error: false
 ---
 
-UPDATE: Python version available [here](python.qmd)
+UPDATE: Python version available [here](python.qmd), Julia version [here](julia.qmd)
 
 In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from [a great tutorial about this topic by Lisa DeBruine](https://journals.sagepub.com/doi/full/10.1177/2515245920965119) and her appendix on its application for [sensitivity analysis](https://debruine.github.io/lmem_sim/articles/appendix1c_sensitivity.html)
 
@@ -93,7 +93,7 @@ n_subj     = 10   # number of subjects
 n_present  = 200   # number of distractor present trials
 n_absent   = 200   # number of distractor absent
 beta_0     = 650   # grand mean
-beta_1     = 30   # effect of category
+beta_1     = 30   # effect of distractor presence
 tau_0      = 80   # by-subject random intercept sd
 tau_1      = 15   # by-subject random slope sd
 rho        = 0.35   # correlation between intercept and slope
@@ -107,16 +107,15 @@ Generate trials with their fixed effects:
 # total number of items = n_ingroup + n_outgroup
 
 items <- data.frame(
-  item_id = seq_len(n_present + n_absent),
-  category = rep(c("distractor_present", "distractor_absent"), c(n_present, n_absent))
+  distractor = rep(c("present", "absent"), c(n_present, n_absent))
 )
 
-# effect-code category
-items$X_i <- recode(items$category, "distractor_absent" = -0.5, "distractor_present" = +0.5)
+# effect-code distractor
+items$X_i <- recode(items$distractor, "absent" = -0.5, "present" = +0.5)
 
 # taking a peek at the items dataframe without changing it
 items %>% 
-  group_by(category) %>% 
+  group_by(distractor) %>% 
   summarise(trial_count = n(), X_i = mean(X_i)) %>% 
   kable(.)
 ```
@@ -150,16 +149,16 @@ kable(head(subjects))
 Now combine and add residual noise to create a complete dataframe:
 
 ```{r}
-# cross subject and item IDs; add an error term
+# cross subjects and items; add an error term
 # nrow(.) is the number of rows in the table
-trials <- crossing(subjects, items)  %>%
+trials <- expand_grid(subjects, items)  %>%
   mutate(e_si = rnorm(nrow(.), mean = 0, sd = sigma)) %>%
-  select(subj_id, item_id, category, X_i, everything())
+  select(subj_id, distractor, X_i, everything())
 
 # calculate the response variable
 dat_sim <- trials %>%
   mutate(RT = beta_0 + T_0s + (beta_1 + T_1s) * X_i + e_si) %>%
-  select(subj_id, item_id, category, X_i, RT)
+  select(subj_id, distractor, X_i, RT)
 
 kable(head(dat_sim))
 ```
@@ -170,7 +169,7 @@ Data generated! Does it look like we'd expect?
 dat_sim %>% 
   ggplot(
     aes(
-      x=category,
+      x=distractor,
       y=RT,
       color=as.factor(subj_id),
       group=as.factor(subj_id)
@@ -191,7 +190,7 @@ dat_sim %>%
 Looks comparable to the original data! Now let's fit a model to see if we recover the parameters:
 
 ```{r}
-m_sim <- lmer(RT ~ category + (category | subj_id), dat_sim)
+m_sim <- lmer(RT ~ distractor + (distractor | subj_id), dat_sim)
 kable(tidy(m_sim))
 ```
 
@@ -204,7 +203,7 @@ my_sim_data <- function(
   n_present  = 200,   # number of distractor present trials
   n_absent   = 200,   # number of distractor absent
   beta_0     = 650,   # grand mean
-  beta_1     = 30,   # effect of category
+  beta_1     = 30,   # effect of distractor presence
   tau_0      = 80,   # by-subject random intercept sd
   tau_1      = 15,   # by-subject random slope sd
   rho        = 0.35,   # correlation between intercept and slope
@@ -215,12 +214,11 @@ my_sim_data <- function(
 # simulate a sample of items
 # total number of items = n_ingroup + n_outgroup
 items <- data.frame(
-  item_id = seq_len(n_present + n_absent),
-  category = rep(c("distractor_present", "distractor_absent"), c(n_present, n_absent))
+  distractor = rep(c("present", "absent"), c(n_present, n_absent))
 )
 
-# effect-code category
-items$X_i <- recode(items$category, "distractor_absent" = -0.5, "distractor_present" = +0.5)
+# effect-code distractor presence
+items$X_i <- recode(items$distractor, "absent" = -0.5, "present" = +0.5)
 
 # simulate a sample of subjects
 
@@ -242,16 +240,16 @@ subject_rfx <- MASS::mvrnorm(n = n_subj,
 subjects <- data.frame(subj_id = seq_len(n_subj),
                        subject_rfx)
 
-# cross subject and item IDs; add an error term
+# cross subject and items; add an error term
 # nrow(.) is the number of rows in the table
-trials <- crossing(subjects, items)  %>%
+trials <- expand_grid(subjects, items)  %>%
   mutate(e_si = rnorm(nrow(.), mean = 0, sd = sigma)) %>%
-  select(subj_id, item_id, category, X_i, everything())
+  select(subj_id, distractor, X_i, everything())
 
 # calculate the response variable
 dat_sim <- trials %>%
   mutate(RT = beta_0 + T_0s + (beta_1 + T_1s) * X_i + e_si) %>%
-  select(subj_id, item_id, category, X_i, RT)
+  select(subj_id, distractor, X_i, RT)
 }
 ```
 
@@ -302,7 +300,7 @@ params <- crossing(
   n_present  = 150,   # number of distractor present trials
   n_absent   = 150,   # number of distractor absent
   beta_0     = 650,   # grand mean
-  beta_1     = 30,   # effect of category
+  beta_1     = 30,   # effect of distractor presence
   tau_0      = 80,   # by-subject random intercept sd
   tau_1      = 15,   # by-subject random slope sd
   rho        = 0.35,   # correlation between intercept and slope
@@ -337,7 +335,7 @@ params <- crossing(
   n_present  = 150,   # number of distractor present trials
   n_absent   = 150,   # number of distractor absent
   beta_0     = 650,   # grand mean
-  beta_1     = 30,   # effect of category
+  beta_1     = 30,   # effect of distractor presence
   tau_0      = 80,   # by-subject random intercept sd
   tau_1      = 15,   # by-subject random slope sd
   rho        = 0.35,   # correlation between intercept and slope
@@ -391,7 +389,7 @@ Our power analysis has determined that, with the parameters established above, w
 
 The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see [this blog post](https://solomonkurz.netlify.app/post/bayesian-power-analysis-part-i/)).
 
-Even if the above code is spaghetti to you (~I was originally planning on also converting it to python/matlab, but there are only so many hours in the day~[click here for a python version](python.qmd)), I hope you will take away a few things from this tutorial:
+Even if the above code is spaghetti to you (~~I was originally planning on also converting it to python/matlab, but there are only so many hours in the day~~[click here for a python version](python.qmd) or [here for a julia version](julia.qmd)), I hope you will take away a few things from this tutorial:
 
 - Power analysis is nothing more than testing whether we can recover the parameters of a hypothesised data-generating process reliably using our statistical test of choice.
 - We can determine the parameters for such a data-generating process in the same way we formulate hypotheses (and indeed, *in some ways these two things are one and the same*): we use our knowledge, intuition, and previous work to inform our decision-making.
