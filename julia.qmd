@@ -21,6 +21,9 @@ using MixedModels
 using Gadfly
 using Statistics
 using Distributions
+using Random
+
+Random.seed!(90059)
 ```
 
 In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study from the Serences lab purpose-built to be used for sensitivity analysis. First let's import the data for our specific case from the [Adam et al. (2021)](https://www.journalofcognition.org/articles/10.5334/joc.182/) study, which is freely available [in an OSF repository](https://osf.io/u7wvy/), and look at the data.
@@ -115,7 +118,7 @@ items = @chain DataFrame(
   :item_id => range(1,n_absent+n_present),
   :category => [repeat(["absent"],n_absent)..., repeat(["present"], n_present)...]
 ) begin
-  @rtransform :X_i = :category == "present" ? 0.5 : -0.5
+  @rtransform :X_i = :category == "present" ? 1 : 0
 end
 
 # items.describe()
@@ -220,7 +223,7 @@ function my_sim_data(;
     :item_id => range(1,n_absent+n_present),
     :category => [repeat(["absent"],n_absent)..., repeat(["present"], n_present)...]
   ) begin
-    @rtransform :X_i = :category == "present" ? 0.5 : -0.5
+    @rtransform :X_i = :category == "present" ? 1 : 0
   end
 
   #simulate a sample of subjects
