@@ -23,6 +23,7 @@ import statsmodels.formula.api as smf
 import itertools
 import glob, os, warnings
 from sklearn.model_selection import ParameterGrid
+from scipy.stats import chi2
 
 import random
 random.seed(90059)
@@ -48,7 +49,8 @@ Once it's imported, we can take a look at our data, e.g., looking at subject mea
 
 d = (df
   .query("acc==1 & set_size==4")
-  .assign(rt = lambda x: x.rt * 1000))
+  .assign(rt = lambda x: x.rt * 1000)
+  .astype({'subject': 'str'}))
 
 sns.set_theme()
 
@@ -57,7 +59,8 @@ sns.catplot(
   x="distractor",
   y="rt",
   hue="subject",
-  kind="point"
+  kind="point",
+  legend=False
 )
 
 ```
@@ -72,8 +75,11 @@ d = (df
 # Our model is simple: RT is dependent on distractor presence, with a random slope and intercept for each subject. More complex models are left as an exercise to the reader.
 
 md = smf.mixedlm("rt ~ distractor", d, groups=d['subject'],re_formula="~distractor")
-mdf = md.fit()
-mdf.summary()
+md_null = smf.mixedlm("rt ~ 1", d, groups=d['subject'],re_formula="~distractor")
+mdf = md.fit(reml=False)
+mdf_null = md_null.fit(reml=False)
+lrt = 1 - chi2.cdf(mdf_null.llf - mdf.llf, 1)
+
 ```
 
 The above model `rt ~ distractor + ( distractor | subject)` is our putative *data generating process*, the parameters that we believe underly the generation of observed dependent variables, and the relationship between those parameters. The table shown above gives us parameter estimates for all fixed and random effects in the model. Now let's plug those parameters into a simulation!
@@ -100,7 +106,7 @@ Generate trials with their fixed effects:
 items = (pd
   .DataFrame({
     'distractor' : np.repeat(['absent', 'present'], [n_absent, n_present])})
-  .assign(X_i=lambda x: np.where(x["distractor"] == 'present', 0.5, -0.5)))
+  .assign(X_i=lambda x: np.where(x["distractor"] == 'present', 1, 0)))
 
 items.describe()
 ```
@@ -245,13 +251,18 @@ def single_run(filename = None, *args, **kwargs):
   with warnings.catch_warnings(record=True) as w:
     warnings.simplefilter("ignore")
     md = smf.mixedlm("RT ~ distractor", dat_sim, groups=dat_sim['subj_id'], re_formula="~distractor")
-    mod_sim = md.fit()
+    md_null = smf.mixedlm("RT ~ 1", dat_sim, groups=dat_sim['subj_id'], re_formula="~distractor")
+    
+    mod_sim = md.fit(reml=False)
+    mod_sim_null = md_null.fit(reml=False)
+    lrt = 1 - chi2.cdf(-2*(mod_sim_null.llf - mod_sim.llf),1)
   sim_results = (mod_sim
     .summary()
     .tables[1]
     .assign(**kwargs))
   sim_results = sim_results.apply(pd.to_numeric, errors='coerce')
   sim_results.index.rename('i',inplace=True)
+  sim_results.at[1,'P>|z|'] = lrt
 
   if not filename == None:
     hdr = not os.path.isfile(filename)
@@ -265,7 +276,7 @@ Now let's run our sensitivity analysis - we will run our simulation many times (
 nreps = 100
 
 params = ParameterGrid({
-  'n_subj'     : [5], # number of subjects
+  'n_subj'     : [7], # number of subjects
   'n_present'  : [150],   # number of distractor present trials
   'n_absent'   : [150],   # number of distractor absent
   'beta_0'     : [650],   # grand mean
