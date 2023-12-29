@@ -92,7 +92,7 @@ formula = @formula(rt ~ 1 + distractor + (1 + distractor | subject))
 formula_null = @formula(rt ~ 1 + (1 + distractor | subject))
 
 fm1 = fit(MixedModel, formula, d)
-fm1_null = fit(MixedModel, formula_zero, d)
+fm1_null = fit(MixedModel, formula_null, d)
 lrt = MixedModels.likelihoodratiotest(fm1,fm1_null)
 
 fm1
@@ -282,7 +282,7 @@ function single_run(filename = nothing, args...; kwargs...)
   mf_null = fit(MixedModel, simformula_null, dat_sim)
   lrt = MixedModels.likelihoodratiotest(mf,mf_null)
   sim_results = DataFrame(coeftable(mf))
-  # the p-values calculated by MixedModels are uncorrected and therefore inflated - we use the best alternative method available to us, the likelihood ratio test vs the intercept-only model, to find a better estimate (note that we leave the intercept p value since it isn't of interest here)
+  # the p-values calculated by MixedModels are uncorrected and therefore inflated - we use the best (reasonable) alternative method available to us, the likelihood ratio test vs the intercept-only model, to find a better estimate (note that we leave the intercept p value since it isn't of interest here)
   sim_results[!,"Pr(>|z|)"][2] = lrt.pvalues[1]
   if length([kwargs...]) != 0
     sim_results = crossjoin(sim_results,DataFrame(kwargs...))
