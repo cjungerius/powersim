@@ -9,9 +9,10 @@ warning: false
 error: false
 ---
 
-UPDATE: Python version available [here](python.qmd), Julia version [here](julia.qmd)
+In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from a great tutorial about this topic by @debruineUnderstandingMixedEffectsModels2021 and Lisa DeBruine's appendix on its application for sensitivity analysis @debruineAppendix1cSensitivity2020. The aim of this tutorial is two-fold:
 
-In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from [a great tutorial about this topic by Lisa DeBruine](https://journals.sagepub.com/doi/full/10.1177/2515245920965119) and her appendix on its application for [sensitivity analysis](https://debruine.github.io/lmem_sim/articles/appendix1c_sensitivity.html)
+1. To demonstrate this approach for the most basic mixed model (using it only to deal with repeated measures - no nesting, no crossed random effects with stimuli types, etc.) which is a very common use of the technique for researchers in my immediate environment (visual attention research).
+2. To translate this approach to different languages - although I love R and encourage everyone to use it for statistical analysis, [Python](python.qmd) remains in use by a sizeable number of researchers, and I would also like to introduce [Julia](julia.qmd) as an alternative.
 
 Before we do anything, let's import all the packages we will need:
 
@@ -20,69 +21,82 @@ library(tidyverse) # Data wrangling, plotting and general awesomeness
 library(lmerTest) # Mixed modeling using lme4 with better support for tests
 library(broom.mixed) # To make pretty tables
 library(knitr) # To print those pretty tables
+library(faux) # Much easier random effects simulation
 
 set.seed(90059)
 ```
 
-In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study from the Serences lab purpose-built to be used for sensitivity analysis. First let's import the data for our specific case from the [Adam et al. (2021)](https://www.journalofcognition.org/articles/10.5334/joc.182/) study, which is freely available [in an OSF repository](https://osf.io/u7wvy/), and look at the data.
+In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study by Kirsten Adam from the Serences lab purpose-built to be used for sensitivity analysis. First let's import the data for our specific case from the @adamClassicVisualSearch2021 study, which is freely available [in an OSF repository](https://osf.io/u7wvy/), and look at the data.
 
-Note that when previous data doesn't exist (or even if it does, but you don't trust that it's  sufficient to base your effect estimates on) there are alternative ways of determining such parameters, including [formally determining a smallest effect size of interest](https://journals.sagepub.com/doi/full/10.1177/2515245918770963).
+Note that when previous data doesn't exist (or even if it does, but you don't trust that it's sufficient to base your effect estimates on) there are alternative ways of determining such parameters, including formally determining a smallest effect size of interest @lakensEquivalenceTestingPsychological2018.
 
 The data we chose is from experiment 1c: variable colour singleton search.
 We are interested in the raw trial data, not the summary data (We are doing a mixed model after all, not an ANOVA) so we have to grab all the raw files and concatenate them.
 
 ```{r}
 df <- list.files(
-  path = "./Experiment_1c",
-  full.names = T) %>% 
-  lapply(
-    read_csv,
-    col_types = cols(
-      gender = "c",
-      set_size = "f"
-    )
-  ) %>% 
-  bind_rows
+    path = "./Experiment_1c",
+    full.names = T
+) %>%
+    lapply(
+        read_csv,
+        col_types = cols(
+            gender = "c",
+            set_size = "f"
+        )
+    ) %>%
+    bind_rows()
 ```
 
 Once it's imported, we can take a look at our data, e.g., looking at subject means between the two conditions:
 
 ```{r}
-df %>% 
-  filter(acc == 1,
-         set_size == 4) %>% 
-  mutate( rt = rt*1000) %>% 
-  ggplot(
-    aes(
-      x=distractor,
-      y=rt,
-      color=as.factor(subject),
-      group=as.factor(subject)
-    )) +
-  guides(color = "none") +
-  stat_summary(
-    fun.data = "mean_se",
-    size=1
+df %>%
+    filter(
+        acc == 1,
+        set_size == 4
+    ) %>%
+    mutate(rt = rt * 1000) %>%
+    ggplot(
+        aes(
+            x = distractor,
+            y = rt,
+            color = as.factor(subject),
+            group = as.factor(subject)
+        )
     ) +
-  theme_bw()+
-  ggtitle("Reaction time by participant")+
-  xlab("Colour singleton")+
-  ylab("Reaction time (ms)")+
-  theme(text=element_text(size=20))
+    guides(color = "none") +
+    stat_summary(
+        fun.data = "mean_se",
+        size = 1,
+        linewidth = 1
+    ) +
+    stat_summary(
+      fun = "mean",
+      geom="line",
+      linewidth=1
+    )+
+    theme_bw() +
+    ggtitle("Reaction time by participant") +
+    xlab("Colour singleton") +
+    ylab("Reaction time (ms)") +
+    theme(text = element_text(size = 20))
 
 ```
 
 We can clearly see typical atttentional capture effects in the data. Now that we have the data, let's model it:
 
 ```{r}
-d <- df %>% 
-  filter(acc == 1,
-         set_size == 4) %>% 
-  mutate( rt = rt*1000)
+d <- df %>%
+    filter(
+        acc == 1,
+        set_size == 4
+    ) %>%
+    mutate(rt = rt * 1000)
 
 # Our model is simple: RT is dependent on distractor presence, with a random slope and intercept for each subject. More complex models are left as an exercise to the reader.
 
-m1 <- lmer(rt ~ distractor + ( distractor | subject), data = d)
+m1 <- lmer(rt ~ distractor + (distractor | subject), data = d)
 
 kable(tidy(m1))
 ```
@@ -91,97 +105,62 @@ The above model `rt ~ distractor + ( distractor | subject)` is our putative *dat
 
 ```{r}
 
-n_subj     = 10   # number of subjects
-n_present  = 200   # number of distractor present trials
-n_absent   = 200   # number of distractor absent
-beta_0     = 650   # grand mean
-beta_1     = 30   # effect of distractor presence
-tau_0      = 80   # by-subject random intercept sd
-tau_1      = 15   # by-subject random slope sd
-rho        = 0.35   # correlation between intercept and slope
-sigma      = 175 # residual nose
+n_subj <- 10      # number of subjects
+n_present <- 200  # number of trials with a singleton present
+n_absent <- 200   # number of trials without a singleton
+beta_0 <- 650     # grand mean
+beta_1 <- 30      # effect of distractor presence
+tau_0 <- 80       # by-subject random intercept sd
+tau_1 <- 15       # by-subject random slope sd
+rho <- 0.35       # correlation between intercept and slope
+sigma <- 175      # residual nose
 
 ```
 
-Generate trials with their fixed effects:
 ```{r}
-# simulate a sample of items
-# total number of items = n_ingroup + n_outgroup
 
-items <- data.frame(
-  distractor = rep(c("present", "absent"), c(n_present, n_absent))
-)
+# Generate a dataframe with one column per subject
+dat_sim <- add_random(subj = n_subj) %>%
+    # Each subject does both types of trials
+    add_within("subj", singleton = c("absent", "present")) %>%
+    # Because these trials are interchangeable, we expand the dataframe to account for trial numbers using the uncount trick
+    add_between("singleton", trial_number=c(n_absent, n_present)) %>%
+    uncount(trial_number) %>% 
+    # Give each participant a random intercept and slope
+    add_ranef("subj", T0s = tau_0, T1s = tau_1, .cors = rho) %>%
+    # Account for residual variance with the sigma term - random noise on each trial
+    mutate(sigma = rnorm(nrow(.), mean = 0, sd = sigma)) %>%
+    # Contrast code singleton so we can do the little summation at the bottom
+    add_contrast("singleton", "treatment", colnames = "s") %>%
+    # Give each trial the right mix of Intercept, slope, random effects, and resildual noise
+    mutate(rt = beta_0 + T0s + (beta_1 + T1s) * s + sigma)
 
-# effect-code distractor
-items$X_i <- recode(items$distractor, "absent" = -0.5, "present" = +0.5)
-
-# taking a peek at the items dataframe without changing it
-items %>% 
-  group_by(distractor) %>% 
-  summarise(trial_count = n(), X_i = mean(X_i)) %>% 
-  kable(.)
-```
-
-And generate participants with their random intercepts and slopes:
-
-```{r}
-# simulate a sample of subjects
-
-# calculate random intercept / random slope covariance
-covar <- rho * tau_0 * tau_1
-
-# put values into variance-covariance matrix
-cov_mx  <- matrix(
-  c(tau_0^2, covar,
-    covar,   tau_1^2),
-  nrow = 2, byrow = TRUE)
-
-# generate the by-subject random effects
-subject_rfx <- MASS::mvrnorm(n = n_subj,
-                             mu = c(T_0s = 0, T_1s = 0),
-                             Sigma = cov_mx)
-
-# combine with subject IDs
-subjects <- data.frame(subj_id = seq_len(n_subj),
-                       subject_rfx)
-
-kable(head(subjects))
-```
-
-Now combine and add residual noise to create a complete dataframe:
-
-```{r}
-# cross subjects and items; add an error term
-# nrow(.) is the number of rows in the table
-trials <- expand_grid(subjects, items)  %>%
-  mutate(e_si = rnorm(nrow(.), mean = 0, sd = sigma)) %>%
-  select(subj_id, distractor, X_i, everything())
-
-# calculate the response variable
-dat_sim <- trials %>%
-  mutate(RT = beta_0 + T_0s + (beta_1 + T_1s) * X_i + e_si) %>%
-  select(subj_id, distractor, X_i, RT)
-
-kable(head(dat_sim))
 ```
 
 Data generated! Does it look like we'd expect?
 
 ```{r}
 dat_sim %>% 
-  ggplot(
-    aes(
-      x=distractor,
-      y=RT,
-      color=as.factor(subj_id),
-      group=as.factor(subj_id)
-    )) +
-  guides(color = "none") +
-  stat_summary(
-    fun.data = "mean_se",
-    size=1
+    ggplot(
+        aes(
+            x = singleton,
+            y = rt,
+            color = subj,
+            group = subj
+        )
     ) +
-  theme_bw()+
+    guides(color = "none") +
+    stat_summary(
+        fun.data = "mean_se",
+        size = 1,
+        linewidth = 1
+    ) +
+    stat_summary(
+      fun = "mean",
+      geom="line",
+      linewidth=1
+    )+
+    theme_bw() +
   ggtitle("Reaction time by participant (simulated)")+
   xlab("Colour singleton")+
   ylab("Reaction time (ms)")+
@@ -192,81 +171,45 @@ dat_sim %>%
 Looks comparable to the original data! Now let's fit a model to see if we recover the parameters:
 
 ```{r}
-m_sim <- lmer(RT ~ distractor + (distractor | subj_id), dat_sim)
+m_sim <- lmer(rt ~ singleton + (singleton | subj), dat_sim)
 kable(tidy(m_sim))
 ```
 
-Great, our simulation works - our fixed effect parameter estimates are close to the originals, and statistically significant! Now for a power analysis, we'd put the above in functions and run the code many times for a given combination of parameters. See below:
-
 ```{r}
 my_sim_data <- function(
-  
-  n_subj     = 5,   # number of subjects
-  n_present  = 200,   # number of distractor present trials
-  n_absent   = 200,   # number of distractor absent
-  beta_0     = 650,   # grand mean
-  beta_1     = 30,   # effect of distractor presence
-  tau_0      = 80,   # by-subject random intercept sd
-  tau_1      = 15,   # by-subject random slope sd
-  rho        = 0.35,   # correlation between intercept and slope
-  sigma      = 175
-  )
-  {
+    n_subj = 5, # number of subjects
+    n_absent = 200, # number of trials per condition
+    n_present = 200,
+    beta_0 = 650, # grand mean
+    beta_1 = 30, # effect of distractor presence
+    tau_0 = 80, # by-subject random intercept sd
+    tau_1 = 15, # by-subject random slope sd
+    rho = 0.35, # correlation between intercept and slope
+    sigma = 175) {
+    dat_sim <- add_random(subj = n_subj) %>%
+    add_within("subj", singleton = c("absent", "present")) %>%
+    add_between("singleton", trial_number=c(n_absent, n_present)) %>%
+    uncount(trial_number) %>% 
+    add_ranef("subj", T0s = tau_0, T1s = tau_1, .cors = rho) %>%
+    mutate(sigma = rnorm(nrow(.), mean = 0, sd = sigma)) %>%
+    add_contrast("singleton", "treatment", colnames = "s") %>%
+    mutate(rt = beta_0 + T0s + (beta_1 + T1s) * s + sigma)
 
-# simulate a sample of items
-# total number of items = n_ingroup + n_outgroup
-items <- data.frame(
-  distractor = rep(c("present", "absent"), c(n_present, n_absent))
-)
-
-# effect-code distractor presence
-items$X_i <- recode(items$distractor, "absent" = -0.5, "present" = +0.5)
-
-# simulate a sample of subjects
-
-# calculate random intercept / random slope covariance
-covar <- rho * tau_0 * tau_1
-
-# put values into variance-covariance matrix
-cov_mx  <- matrix(
-  c(tau_0^2, covar,
-    covar,   tau_1^2),
-  nrow = 2, byrow = TRUE)
-
-# generate the by-subject random effects
-subject_rfx <- MASS::mvrnorm(n = n_subj,
-                             mu = c(T_0s = 0, T_1s = 0),
-                             Sigma = cov_mx)
-
-# combine with subject IDs
-subjects <- data.frame(subj_id = seq_len(n_subj),
-                       subject_rfx)
-
-# cross subject and items; add an error term
-# nrow(.) is the number of rows in the table
-trials <- expand_grid(subjects, items)  %>%
-  mutate(e_si = rnorm(nrow(.), mean = 0, sd = sigma)) %>%
-  select(subj_id, distractor, X_i, everything())
-
-# calculate the response variable
-dat_sim <- trials %>%
-  mutate(RT = beta_0 + T_0s + (beta_1 + T_1s) * X_i + e_si) %>%
-  select(subj_id, distractor, X_i, RT)
+    dat_sim
 }
 ```
 
 The above function simulates data. The function below combines it with a model fit so we have a function that can be repeatedly called during our power analysis.
 
 ```{r}
+
 single_run <- function(filename = NULL, ...) {
-  # ... is a shortcut that forwards any arguments to my_sim_data()
-  dat_sim <- my_sim_data(...)
-  
-  # run lmer and capture any warnings
+    dat_sim <- my_sim_data(...)
+      # run lmer and capture any warnings
   ww <- ""
   suppressMessages(suppressWarnings(
     mod_sim <- withCallingHandlers({
-      lmer(RT ~ X_i + (1 + X_i | subj_id),
+      lmer(rt ~ singleton + (singleton | subj),
            dat_sim, REML = FALSE)},
       warning = function(w) { ww <<- w$message }
     )
@@ -281,7 +224,7 @@ single_run <- function(filename = NULL, ...) {
   for (name in names(params)) {
     sim_results[name] <- params[name]
   }
-  
+
   # append the results to a file if filename is set
   if (!is.null(filename)) {
     append <- file.exists(filename) # append if the file exists
@@ -290,23 +233,26 @@ single_run <- function(filename = NULL, ...) {
   
   sim_results
 }
+
+
 ```
 
 Now let's run our sensitivity analysis - we will run our simulation 1000 times for each combination of parameters, and record how often the fixed effect estimates reach significance:
+
 ```{r}
 nreps <- 1000
 
 params <- crossing(
-  rep        = 1:nreps, # number of runs
-  n_subj     = 10, # number of subjects
-  n_present  = 150,   # number of distractor present trials
-  n_absent   = 150,   # number of distractor absent
-  beta_0     = 650,   # grand mean
-  beta_1     = 30,   # effect of distractor presence
-  tau_0      = 80,   # by-subject random intercept sd
-  tau_1      = 15,   # by-subject random slope sd
-  rho        = 0.35,   # correlation between intercept and slope
-  sigma      = 175  # residual (standard deviation)
+  rep        = 1:nreps,   # number of runs
+  n_subj     = 10,        # number of subjects
+  n_absent   = 150,       # number of trials per condition
+  n_present  = 150,
+  beta_0     = 650,       # grand mean
+  beta_1     = 30,        # effect of distractor presence
+  tau_0      = 80,        # by-subject random intercept sd
+  tau_1      = 15,        # by-subject random slope sd
+  rho        = 0.35,      # correlation between intercept and slope
+  sigma      = 175        # residual (standard deviation)
 ) %>%
   select(-rep)
   
@@ -328,20 +274,20 @@ sims %>%
 If we want to run our sensitivity analysis across a given parameter space, we'll have to map the function single_run to generate data across this space, for example, over a varying number of participants:
 
 ```{r}
-filename1 <- "sens1.csv"
-nreps <- 1000 # number of replications per parameter combo
+filename1 <- "sens_faux.csv"
+nreps <- 1000                # number of replications per parameter combo
 
 params <- crossing(
-  rep        = 1:nreps, # repeats each combo nreps times
-  n_subj     = seq(2, 15), # number of subjects
-  n_present  = 150,   # number of distractor present trials
-  n_absent   = 150,   # number of distractor absent
-  beta_0     = 650,   # grand mean
-  beta_1     = 30,   # effect of distractor presence
-  tau_0      = 80,   # by-subject random intercept sd
-  tau_1      = 15,   # by-subject random slope sd
-  rho        = 0.35,   # correlation between intercept and slope
-  sigma      = 175  # residual (standard deviation)
+  rep         = 1:nreps,     # repeats each combo nreps times
+  n_subj      = seq(2, 15),  # number of subjects
+  n_present   = 150,         # number of distractor present trials
+  n_absent    = 150,         # number of distractor absent trials
+  beta_0      = 650,         # Intercept
+  beta_1      = 30,          # effect of distractor presence
+  tau_0       = 80,          # by-subject random intercept sd
+  tau_1       = 15,          # by-subject random slope sd
+  rho         = 0.35,        # correlation between intercept and slope
+  sigma       = 175          # residual (standard deviation)
 ) %>%
   select(-rep)
 
@@ -367,7 +313,7 @@ ct <- cols(warnings = col_character(),
 sims1 <- read_csv(filename1, col_types = ct)
 
 power1 <- sims1 %>% 
-  filter(effect == "fixed", term == "X_i") %>%
+  filter(effect == "fixed", term == "singleton.present-absent") %>%
   group_by(n_subj) %>%
   summarise(
     mean_estimate = mean(estimate),
@@ -389,7 +335,7 @@ power1 %>%
 
 Our power analysis has determined that, with the parameters established above, we need ~8 or more participants to reliably detect an effect!
 
-The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see [this blog post](https://solomonkurz.netlify.app/post/bayesian-power-analysis-part-i/)).
+The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see @kurzBayesianPowerAnalysis2021.)
 
 Even if the above code is spaghetti to you (~~I was originally planning on also converting it to python/matlab, but there are only so many hours in the day~~[click here for a python version](python.qmd) or [here for a julia version](julia.qmd)), I hope you will take away a few things from this tutorial:
 
@@ -398,4 +344,7 @@ Even if the above code is spaghetti to you (~~I was originally planning on also 
 - If you have a hypothetical data-generating process, you can simulate data by simply formalising that process as code and letting it simulate a dataset
 - Simulation can help you answer questions about your statistical approach that are difficult to answer with other tools
 
+### References
 
+::: {#refs}
+:::

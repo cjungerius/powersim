@@ -7,9 +7,13 @@ format: html
 html:
 warning: false
 error: false
+jupyter: julia-1.9
 ---
 
-In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from [a great tutorial about this topic by Lisa DeBruine](https://journals.sagepub.com/doi/full/10.1177/2515245920965119) and her appendix on its application for [sensitivity analysis](https://debruine.github.io/lmem_sim/articles/appendix1c_sensitivity.html)
+In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from a great tutorial about this topic by @debruineUnderstandingMixedEffectsModels2021 and Lisa DeBruine's appendix on its application for sensitivity analysis @debruineAppendix1cSensitivity2020. The aim of this tutorial is two-fold:
+
+1. To demonstrate this approach for the most basic mixed model (using it only to deal with repeated measures - no nesting, no crossed random effects with stimuli types, etc.) which is a very common use of the technique for researchers in my immediate environment (visual attention research).
+2. To translate this approach to different languages - although I love [R](index.qmd) and encourage everyone to use it for statistical analysis, [Python](python.qmd) remains in use by a sizeable number of researchers, and I would also like to introduce Julia as an alternative.
 
 Before we do anything, let's import all the packages we will need:
 
@@ -26,9 +30,9 @@ using Random
 Random.seed!(90059)
 ```
 
-In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study from the Serences lab purpose-built to be used for sensitivity analysis. First let's import the data for our specific case from the [Adam et al. (2021)](https://www.journalofcognition.org/articles/10.5334/joc.182/) study, which is freely available [in an OSF repository](https://osf.io/u7wvy/), and look at the data.
+In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study by Kirsten Adam from the Serences lab purpose-built to be used for sensitivity analysis. First let's import the data for our specific case from the @adamClassicVisualSearch2021 study, which is freely available [in an OSF repository](https://osf.io/u7wvy/), and look at the data.
 
-Note that when previous data doesn't exist (or even if it does, but you don't trust that it's  sufficient to base your effect estimates on) there are alternative ways of determining such parameters, including [formally determining a smallest effect size of interest](https://journals.sagepub.com/doi/full/10.1177/2515245918770963).
+Note that when previous data doesn't exist (or even if it does, but you don't trust that it's sufficient to base your effect estimates on) there are alternative ways of determining such parameters, including formally determining a smallest effect size of interest @lakensEquivalenceTestingPsychological2018.
 
 The data we chose is from experiment 1c: variable colour singleton search.
 We are interested in the raw trial data, not the summary data (We are doing a mixed model after all, not an ANOVA) so we have to grab all the raw files and concatenate them.
@@ -102,15 +106,15 @@ The above model `rt ~ distractor + ( distractor | subject)` is our putative *dat
 
 ```{julia}
 
-n_subj     = 10   # number of subjects
-n_present  = 200   # number of distractor present trials
-n_absent   = 200   # number of distractor absent
-beta_0     = 650   # grand mean
-beta_1     = 30   # effect of category
-tau_0      = 80   # by-subject random intercept sd
-tau_1      = 15   # by-subject random slope sd
+n_subj     = 10     # number of subjects
+n_present  = 200    # number of distractor present trials
+n_absent   = 200    # number of distractor absent
+beta_0     = 650    # Intercept
+beta_1     = 30     # effect of category
+tau_0      = 80     # by-subject random intercept sd
+tau_1      = 15     # by-subject random slope sd
 rho        = 0.35   # correlation between intercept and slope
-sigma      = 175 # residual nose
+sigma      = 175    # residual nose
 
 ```
 
@@ -209,20 +213,20 @@ lrt_sim = MixedModels.likelihoodratiotest(mf2,mf2_null)
 
 ```
 
-Great, our simulation works - our fixed effect parameter estimates are close to the originals, and statistically significant! Now for a power analysis, we'd put the above in functions and run the code many times for a given combination of parameters. See below:
+Great, our simulation works - we recover our ground truth for the different coefficients (allowing for differences due to noise and limited sample size). Now for a power analysis, we'd put the above in functions and run the code many times for a given combination of parameters. See below:
 
 ```{julia}
 
 function my_sim_data(;
-  n_subj     = 5,   # number of subjects
-  n_present  = 200,   # number of distractor present trials
-  n_absent   = 200,   # number of distractor absent
-  beta_0     = 650,   # grand mean
-  beta_1     = 30,   # effect of category
-  tau_0      = 80,   # by-subject random intercept sd
-  tau_1      = 15,   # by-subject random slope sd
-  rho        = 0.35,   # correlation between intercept and slope
-  sigma      = 175 
+  n_subj     = 5,       # number of subjects
+  n_present  = 200,     # number of distractor present trials
+  n_absent   = 200,     # number of distractor absent
+  beta_0     = 650,     # Intercept
+  beta_1     = 30,      # effect of category
+  tau_0      = 80,      # by-subject random intercept sd
+  tau_1      = 15,      # by-subject random slope sd
+  rho        = 0.35,    # correlation between intercept and slope
+  sigma      = 175      # residual noise
 )
   
   # simulate a sample of items
@@ -305,15 +309,15 @@ nreps = 1000
 params = allcombinations(
   DataFrame,
   :rep        => 1:nreps, # number of runs
-  :n_subj     => 8, # number of subjects
-  :n_present  => 150,   # number of distractor present trials
-  :n_absent   => 150,   # number of distractor absent
-  :beta_0     => 650,   # grand mean
-  :beta_1     => 30,   # effect of category
-  :tau_0      => 80,   # by-subject random intercept sd
-  :tau_1      => 15,   # by-subject random slope sd
-  :rho        => 0.35,   # correlation between intercept and slope
-  :sigma      => 175  # residual (standard deviation)
+  :n_subj     => 8,       # number of subjects
+  :n_present  => 150,     # number of distractor present trials
+  :n_absent   => 150,     # number of distractor absent
+  :beta_0     => 650,     # Intercept
+  :beta_1     => 30,      # effect of category
+  :tau_0      => 80,      # by-subject random intercept sd
+  :tau_1      => 15,      # by-subject random slope sd
+  :rho        => 0.35,    # correlation between intercept and slope
+  :sigma      => 175      # residual (standard deviation)
 )
 
 select!(params,Not("rep"))
@@ -341,15 +345,15 @@ nreps = 1000
 params = allcombinations(
   DataFrame,
   :rep        => 1:nreps, # number of runs
-  :n_subj     => 2:15, # number of subjects
-  :n_present  => 150,   # number of distractor present trials
-  :n_absent   => 150,   # number of distractor absent
-  :beta_0     => 650,   # grand mean
-  :beta_1     => 30,   # effect of category
-  :tau_0      => 80,   # by-subject random intercept sd
-  :tau_1      => 15,   # by-subject random slope sd
-  :rho        => 0.35,   # correlation between intercept and slope
-  :sigma      => 175  # residual (standard deviation)
+  :n_subj     => 2:15,    # number of subjects
+  :n_present  => 150,     # number of distractor present trials
+  :n_absent   => 150,     # number of distractor absent
+  :beta_0     => 650,     # Intercept
+  :beta_1     => 30,      # effect of category
+  :tau_0      => 80,      # by-subject random intercept sd
+  :tau_1      => 15,      # by-subject random slope sd
+  :rho        => 0.35,    # correlation between intercept and slope
+  :sigma      => 175      # residual (standard deviation)
 )
 
 select!(params,Not("rep"))
@@ -404,9 +408,9 @@ plot(
 
 ```
 
-Our power analysis suggests that, with the parameters established above, we need ~8 or more participants to reliably detect an effect!
+Our power analysis has determined that, with the parameters established above, we need ~8 or more participants to reliably detect an effect!
 
-The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see [this blog post](https://solomonkurz.netlify.app/post/bayesian-power-analysis-part-i/)).
+The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see @kurzBayesianPowerAnalysis2021.)
 
 Even if the above code is spaghetti to you ([Perhaps you prefer R?](index.qmd) [Or Python?](python.qmd)), I hope you will take away a few things from this tutorial:
 
@@ -415,4 +419,7 @@ Even if the above code is spaghetti to you ([Perhaps you prefer R?](index.qmd) [
 - If you have a hypothetical data-generating process, you can simulate data by simply formalising that process as code and letting it simulate a dataset
 - Simulation can help you answer questions about your statistical approach that are difficult to answer with other tools
 
+### References
 
+::: {#refs}
+:::

@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: docs
+bibliography: powersim.bib
+csl: apa.csl
 website:
   sidebar:
     style: "docked"
@@ -12,3 +14,5 @@ website:
         file: python.qmd
       - text: "Julia version"
         file: julia.qmd
+      - text: "Old R version"
+        file: index_old.qmd
