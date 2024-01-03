@@ -41,7 +41,8 @@ website:
         href: https://github.com/cjungerius
       - icon: twitter 
         href: https://twitter.com/chrisjungerius
-  twitter-card: true
+  twitter-card:
+    image: preview.png
   open-graph: true
 theme: 
   light: flatly
