@@ -9,6 +9,7 @@ author:
 bibliography: powersim.bib
 csl: apa.csl
 website:
+  site-url: https://cjungerius.github.io/powersim/
   title: "Power Simulation: A primer in 3 languages"
   description: "How to simulate linear mixed models in R, Python and Julia"
   sidebar:
