@@ -89,13 +89,22 @@ end
 # Our model is simple: RT is dependent on distractor presence, with a random slope and intercept for each subject. More complex models are left as an exercise to the reader.
 
 formula = @formula(rt ~ 1 + distractor + (1 + distractor | subject))
-formula_null = @formula(rt ~ 1 + (1 + distractor | subject))
 
+fm1 = fit(MixedModel, formula, d, REML=true)
+```
+
+```{julia}
+# check random effects
+VarCorr(fm1)
+```
+
+We can also check whether the addition of the distractor term is even useful in describing the data: does it explain significantly more variance than the intercept only model?
+
+```{julia}
 fm1 = fit(MixedModel, formula, d)
+formula_null = @formula(rt ~ 1 + (1 + distractor | subject))
 fm1_null = fit(MixedModel, formula_null, d)
 lrt = MixedModels.likelihoodratiotest(fm1,fm1_null)
-
-fm1
 ```
 
 The above model `rt ~ distractor + ( distractor | subject)` is our putative *data generating process*, the parameters that we believe underly the generation of observed dependent variables, and the relationship between those parameters. The table shown above gives us parameter estimates for all fixed and random effects in the model. Now let's plug those parameters into a simulation!
@@ -200,12 +209,23 @@ Data generated! Does it look like we'd expect?
 Looks comparable to the original data! Now let's fit a model to see if we recover the parameters:
 
 ```{julia}
-
 simformula = @formula(RT ~ 1 + category + (1 + category | subj_id))
+fm2 = fit(MixedModel, simformula, dat_sim, REML=true)
+```
+
+```{julia}
+# check random effects
+VarCorr(fm2)
+```
+
+And as a quick test: does the full model explain the data significantly better than an intercept only model?
+
+```{julia}
+
+fm2 = fit(MixedModel, simformula, dat_sim)
 simformula_null = @formula(RT ~ 1 + (category | subj_id))
-mf2 = fit(MixedModel, simformula, dat_sim)
-mf2_null = fit(MixedModel, simformula_null, dat_sim)
-lrt_sim = MixedModels.likelihoodratiotest(mf2,mf2_null)
+fm2_null = fit(MixedModel, simformula_null, dat_sim)
+lrt_sim = MixedModels.likelihoodratiotest(fm2,fm2_null)
 
 ```
 
@@ -278,10 +298,10 @@ function single_run(filename = nothing, args...; kwargs...)
   dat_sim = my_sim_data(;kwargs...)
   simformula = @formula(RT ~ 1 + category + (1 + category | subj_id))
   simformula_null = @formula(RT ~ 1 + (category | subj_id))
-  mf = fit(MixedModel, simformula, dat_sim) 
-  mf_null = fit(MixedModel, simformula_null, dat_sim)
-  lrt = MixedModels.likelihoodratiotest(mf,mf_null)
-  sim_results = DataFrame(coeftable(mf))
+  fm = fit(MixedModel, simformula, dat_sim) 
+  fm_null = fit(MixedModel, simformula_null, dat_sim)
+  lrt = MixedModels.likelihoodratiotest(fm,fm_null)
+  sim_results = DataFrame(coeftable(fm))
   # the p-values calculated by MixedModels are uncorrected and therefore inflated - we use the best (reasonable) alternative method available to us, the likelihood ratio test vs the intercept-only model, to find a better estimate (note that we leave the intercept p value since it isn't of interest here)
   sim_results[!,"Pr(>|z|)"][2] = lrt.pvalues[1]
   if length([kwargs...]) != 0
