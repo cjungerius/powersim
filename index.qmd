@@ -132,7 +132,7 @@ dat_sim <- add_random(subj = n_subj) %>%
     mutate(sigma = rnorm(nrow(.), mean = 0, sd = sigma)) %>%
     # Contrast code singleton so we can do the little summation at the bottom
     add_contrast("singleton", "treatment", colnames = "s") %>%
-    # Give each trial the right mix of Intercept, slope, random effects, and resildual noise
+    # Give each trial the right mix of Intercept, slope, random effects, and residual noise
     mutate(rt = beta_0 + T0s + (beta_1 + T1s) * s + sigma)
 
 ```

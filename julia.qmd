@@ -7,7 +7,6 @@ format: html
 html:
 warning: false
 error: false
-jupyter: julia-1.9
 ---
 
 In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from a great tutorial about this topic by @debruineUnderstandingMixedEffectsModels2021 and Lisa DeBruine's appendix on its application for sensitivity analysis @debruineAppendix1cSensitivity2020. The aim of this tutorial is two-fold:
