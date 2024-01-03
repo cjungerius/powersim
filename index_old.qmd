@@ -1,8 +1,5 @@
 ---
 title: "Power Simulation in a Mixed Effects design using R"
-author: 
-  - name: Chris Jungerius
-  - email: d.c.jungerius@vu.nl
 format: html
 html:
 warning: false
@@ -13,7 +10,7 @@ error: false
 This is an older version of this page, which doesn't use the `faux` package. I recommend using faux because it makes setting up simulations faster and easier, but I have left up this version for those who prefer not to install more packages. This version is also slightly more verbose during the simulation setup, which might aid understanding.
 :::
 
-In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from a great tutorial about this topic by @debruineUnderstandingMixedEffectsModels2021 and Lisa DeBruine's appendix on its application for sensitivity analysis @debruineAppendix1cSensitivity2020. The aim of this tutorial is two-fold:
+In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from a great tutorial about this topic by @debruineUnderstandingMixedEffectsModels2021 and Lisa DeBruine's appendix on its application for sensitivity analysis [@debruineAppendix1cSensitivity2020]. The aim of this tutorial is two-fold:
 
 1. To demonstrate this approach for the most basic mixed model (using it only to deal with repeated measures - no nesting, no crossed random effects with stimuli types, etc.) which is a very common use of the technique for researchers in my immediate environment (visual attention research).
 2. To translate this approach to different languages - although I love R and encourage everyone to use it for statistical analysis, [Python](python.qmd) remains in use by a sizeable number of researchers, and I would also like to introduce [Julia](julia.qmd) as an alternative.

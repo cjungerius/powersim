@@ -1,15 +1,12 @@
 ---
 title: "Power Simulation in a Mixed Effects design using Julia"
-author: 
-  - name: Chris Jungerius
-  - email: d.c.jungerius@vu.nl
 format: html
 html:
 warning: false
 error: false
 ---
 
-In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from a great tutorial about this topic by @debruineUnderstandingMixedEffectsModels2021 and Lisa DeBruine's appendix on its application for sensitivity analysis @debruineAppendix1cSensitivity2020. The aim of this tutorial is two-fold:
+In this notebook we'll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from a great tutorial about this topic by @debruineUnderstandingMixedEffectsModels2021 and Lisa DeBruine's appendix on its application for sensitivity analysis [@debruineAppendix1cSensitivity2020]. The aim of this tutorial is two-fold:
 
 1. To demonstrate this approach for the most basic mixed model (using it only to deal with repeated measures - no nesting, no crossed random effects with stimuli types, etc.) which is a very common use of the technique for researchers in my immediate environment (visual attention research).
 2. To translate this approach to different languages - although I love [R](index.qmd) and encourage everyone to use it for statistical analysis, [Python](python.qmd) remains in use by a sizeable number of researchers, and I would also like to introduce Julia as an alternative.

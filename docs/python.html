@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Chris Jungerius">
 
-<title>Power Simulation in a Mixed Effects design using Python</title>
+<title>Power Simulation: A primer in 3 languages - Power Simulation in a Mixed Effects design using Python</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -93,11 +94,11 @@ div.csl-indent {
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
-  "location": "sidebar",
+  "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
-  "panel-placement": "start",
-  "type": "textbox",
+  "panel-placement": "end",
+  "type": "overlay",
   "limit": 20,
   "language": {
     "search-no-results-text": "No results",
@@ -119,10 +120,38 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar docked fullcontent">
+<body class="nav-sidebar docked nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Power Simulation: A primer in 3 languages</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+    <a href="https://twitter.com/chrisjungerius" rel="" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-twitter"></i></a>
+    <div class="dropdown">
+      <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label=""><i class="bi bi-github"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools ms-auto-item" href="https://github.com/cjungerius/powersim">
+            Source Code
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools ms-auto-item" href="https://github.com/cjungerius/powersim/issues">
+            Report a Bug
+            </a>
+          </li>
+      </ul>
+    </div>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
@@ -135,7 +164,7 @@ div.csl-indent {
   </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
     <div class="sidebar-menu-container"> 
@@ -179,10 +208,25 @@ div.csl-indent {
 </div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Chris Jungerius </p>
+  </div>
+    <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://www.uva.nl/en">
+            University of Amsterdam
+            </a>
+          </p>
+      </div>
+    </div>
 
 <div class="quarto-title-meta">
 
-    
+      
   
     
   </div>
@@ -190,7 +234,7 @@ div.csl-indent {
 
 </header>
 
-<p>In this notebook we’ll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from a great tutorial about this topic by <span class="citation" data-cites="debruineUnderstandingMixedEffectsModels2021">DeBruine &amp; Barr (<a href="#ref-debruineUnderstandingMixedEffectsModels2021" role="doc-biblioref">2021</a>)</span> and Lisa DeBruine’s appendix on its application for sensitivity analysis <span class="citation" data-cites="debruineAppendix1cSensitivity2020">DeBruine &amp; Barr (<a href="#ref-debruineAppendix1cSensitivity2020" role="doc-biblioref">2020</a>)</span>. The aim of this tutorial is two-fold:</p>
+<p>In this notebook we’ll go through a quick example of setting up a power analysis, using data from an existing, highly-powered study to make credible parameter estimates. The code for setting up a simulation is inspired by/shamelessly stolen from a great tutorial about this topic by <span class="citation" data-cites="debruineUnderstandingMixedEffectsModels2021">DeBruine &amp; Barr (<a href="#ref-debruineUnderstandingMixedEffectsModels2021" role="doc-biblioref">2021</a>)</span> and Lisa DeBruine’s appendix on its application for sensitivity analysis <span class="citation" data-cites="debruineAppendix1cSensitivity2020">(<a href="#ref-debruineAppendix1cSensitivity2020" role="doc-biblioref">DeBruine &amp; Barr, 2020</a>)</span>. The aim of this tutorial is two-fold:</p>
 <ol type="1">
 <li>To demonstrate this approach for the most basic mixed model (using it only to deal with repeated measures - no nesting, no crossed random effects with stimuli types, etc.) which is a very common use of the technique for researchers in my immediate environment (visual attention research).</li>
 <li>To translate this approach to different languages - although I love <a href="./index.html">R</a> and encourage everyone to use it for statistical analysis, Python remains in use by a sizeable number of researchers, and I would also like to introduce <a href="./julia.html">Julia</a> as an alternative.</li>
@@ -481,44 +525,44 @@ div.csl-indent {
 <tr class="even">
 <td data-quarto-table-cell-role="th">mean</td>
 <td>4.50000</td>
-<td>-17.271127</td>
-<td>-0.859632</td>
+<td>15.429289</td>
+<td>-1.403850</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">std</td>
 <td>3.02765</td>
-<td>74.746471</td>
-<td>13.287269</td>
+<td>84.947108</td>
+<td>13.405659</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">min</td>
 <td>0.00000</td>
-<td>-139.318368</td>
-<td>-23.359813</td>
+<td>-126.882119</td>
+<td>-18.765702</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">25%</td>
 <td>2.25000</td>
-<td>-63.154617</td>
-<td>-7.704764</td>
+<td>-41.825515</td>
+<td>-8.837787</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">50%</td>
 <td>4.50000</td>
-<td>-26.488825</td>
-<td>-3.103008</td>
+<td>11.188724</td>
+<td>-3.259700</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">75%</td>
 <td>6.75000</td>
-<td>37.953663</td>
-<td>3.729326</td>
+<td>77.046456</td>
+<td>3.892891</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">max</td>
 <td>9.00000</td>
-<td>96.445480</td>
-<td>23.913242</td>
+<td>161.792922</td>
+<td>29.188157</td>
 </tr>
 </tbody>
 </table>
@@ -563,70 +607,70 @@ div.csl-indent {
 <td>0</td>
 <td>absent</td>
 <td>0</td>
-<td>832.331252</td>
+<td>836.343073</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1</td>
 <td>1</td>
 <td>absent</td>
 <td>0</td>
-<td>580.917390</td>
+<td>676.604902</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2</td>
 <td>2</td>
 <td>absent</td>
 <td>0</td>
-<td>498.343339</td>
+<td>949.389499</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
 <td>3</td>
 <td>absent</td>
 <td>0</td>
-<td>811.465070</td>
+<td>901.909449</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">4</td>
 <td>4</td>
 <td>absent</td>
 <td>0</td>
-<td>425.125071</td>
+<td>548.583726</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">5</td>
 <td>5</td>
 <td>absent</td>
 <td>0</td>
-<td>669.570885</td>
+<td>521.649637</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">6</td>
 <td>6</td>
 <td>absent</td>
 <td>0</td>
-<td>758.727503</td>
+<td>743.639355</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">7</td>
 <td>7</td>
 <td>absent</td>
 <td>0</td>
-<td>946.781381</td>
+<td>1143.209547</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">8</td>
 <td>8</td>
 <td>absent</td>
 <td>0</td>
-<td>776.457095</td>
+<td>636.396172</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">9</td>
 <td>9</td>
 <td>absent</td>
 <td>0</td>
-<td>722.647844</td>
+<td>930.498802</td>
 </tr>
 </tbody>
 </table>
@@ -672,19 +716,19 @@ div.csl-indent {
 <td>No. Groups:</td>
 <td>10</td>
 <td>Scale:</td>
-<td>31160.2343</td>
+<td>32061.9211</td>
 </tr>
 <tr class="even">
 <td>Min. group size:</td>
 <td>400</td>
 <td>Log-Likelihood:</td>
-<td>-26383.8513</td>
+<td>-26441.4843</td>
 </tr>
 <tr class="odd">
 <td>Max. group size:</td>
 <td>400</td>
 <td>Converged:</td>
-<td>No</td>
+<td>Yes</td>
 </tr>
 <tr class="even">
 <td>Mean group size:</td>
@@ -707,26 +751,26 @@ div.csl-indent {
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">Intercept</td>
-<td>635.249</td>
-<td>26.091</td>
-<td>24.348</td>
+<td>667.397</td>
+<td>26.737</td>
+<td>24.961</td>
 <td>0.000</td>
-<td>584.112</td>
-<td>686.386</td>
+<td>614.993</td>
+<td>719.800</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">distractor[T.present]</td>
-<td>32.013</td>
-<td>5.923</td>
-<td>5.405</td>
+<td>27.233</td>
+<td>6.005</td>
+<td>4.535</td>
 <td>0.000</td>
-<td>20.405</td>
-<td>43.622</td>
+<td>15.464</td>
+<td>39.003</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">Group Var</td>
-<td>6651.458</td>
-<td>17.101</td>
+<td>6988.452</td>
+<td>18.866</td>
 <td></td>
 <td></td>
 <td></td>
@@ -734,8 +778,8 @@ div.csl-indent {
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">Group x distractor[T.present] Cov</td>
-<td>-454.911</td>
-<td>3.631</td>
+<td>528.540</td>
+<td>3.216</td>
 <td></td>
 <td></td>
 <td></td>
@@ -743,8 +787,8 @@ div.csl-indent {
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">distractor[T.present] Var</td>
-<td>39.172</td>
-<td>1.918</td>
+<td>39.974</td>
+<td>1.061</td>
 <td></td>
 <td></td>
 <td></td>
@@ -892,15 +936,15 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">Intercept</td>
-<td>653.43452</td>
-<td>3.386895</td>
+<td>648.97164</td>
+<td>2.887010</td>
 <td>1.00</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">distractor[T.present]</td>
-<td>30.13999</td>
-<td>0.924530</td>
-<td>0.86</td>
+<td>28.42815</td>
+<td>0.953449</td>
+<td>0.85</td>
 </tr>
 </tbody>
 </table>
@@ -948,7 +992,7 @@ div.csl-indent {
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sns.regplot(x<span class="op">=</span>power1.index, y<span class="op">=</span>power1[<span class="st">"power"</span>],lowess<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>plt.axhline(y<span class="op">=</span><span class="fl">.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
-<pre><code>&lt;matplotlib.lines.Line2D at 0x23ea5cb61c0&gt;</code></pre>
+<pre><code>&lt;matplotlib.lines.Line2D at 0x203e65f74c0&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="python_files/figure-html/cell-17-output-2.png" width="593" height="428"></p>
@@ -1221,6 +1265,30 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">© 2023, Chris Jungerius</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/cjungerius">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/chrisjungerius">
+      <i class="bi bi-twitter" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
 
 
 
