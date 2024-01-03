@@ -28,7 +28,7 @@ set.seed(90059)
 
 In this example, we will make an estimate of the number of participants we need to replicate a simple and well-established experimental finding: The capture of attention by a colour singleton during visual search for a unique shape singleton. For this example, we are fortunate in that there are many studies of this effect for us to base our parameter estimates on. One recent example is a highly-powered study by Kirsten Adam from the Serences lab purpose-built to be used for sensitivity analysis. First let's import the data for our specific case from the @adamClassicVisualSearch2021 study, which is freely available [in an OSF repository](https://osf.io/u7wvy/), and look at the data.
 
-Note that when previous data doesn't exist (or even if it does, but you don't trust that it's sufficient to base your effect estimates on) there are alternative ways of determining such parameters, including formally determining a smallest effect size of interest @lakensEquivalenceTestingPsychological2018.
+Note that when previous data doesn't exist (or even if it does, but you don't trust that it's sufficient to base your effect estimates on) there are alternative ways of determining such parameters, including formally determining a smallest effect size of interest [@lakensEquivalenceTestingPsychological2018].
 
 The data we chose is from experiment 1c: variable colour singleton search.
 We are interested in the raw trial data, not the summary data (We are doing a mixed model after all, not an ANOVA) so we have to grab all the raw files and concatenate them.
@@ -399,7 +399,7 @@ power1 %>%
 
 Our power analysis has determined that, with the parameters established above, we need ~8 or more participants to reliably detect an effect!
 
-The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see @kurzBayesianPowerAnalysis2021.)
+The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. [For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see @kurzBayesianPowerAnalysis2021.]
 
 Even if the above code is spaghetti to you (~~I was originally planning on also converting it to python/matlab, but there are only so many hours in the day~~[click here for a python version](python.qmd) or [here for a julia version](julia.qmd)), I hope you will take away a few things from this tutorial:
 

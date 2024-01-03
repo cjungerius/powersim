@@ -362,7 +362,7 @@ plt.axhline(y=.8)
 
 Our power analysis has determined that, with the parameters established above, we need ~8 or more participants to reliably detect an effect!
 
-The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. (For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see @kurzBayesianPowerAnalysis2021.)
+The code used above is specific to power analysis for mixed models, but the approach generalises to other methods too, of course! The above code can easily be wrangled to handle different model types (simply change the model definition in `single_run` and make sure to capture the right parameters), and even Bayesian approaches. [For a thorough example of doing power analysis with Bayesian methods and the awesome bayesian regression package `brms`, see @kurzBayesianPowerAnalysis2021.]
 
 Even if the above code is spaghetti to you ([Perhaps you prefer R?](index.qmd) [or Julia?](julia.qmd)), I hope you will take away a few things from this tutorial:
 
